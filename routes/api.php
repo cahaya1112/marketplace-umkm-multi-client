@@ -11,7 +11,7 @@ Route::get('/product', function () {
     return response()->json([
         'success' => true,
         'message' => 'Data produk berhasil diambil',
-        'data' => []
+        'data' => [],
     ]);
 });
 
@@ -19,7 +19,7 @@ Route::post('/product', function (Request $request) {
     return response()->json([
         'success' => true,
         'message' => 'Data produk berhasil ditambahkan',
-        'data' => $request->all()
+        'data' => $request->all(),
     ], 201);
 });
 
@@ -29,7 +29,7 @@ Route::put('/product/{id}', function (Request $request, $id) {
         'message' => 'Data produk berhasil diperbarui',
         'data' => [
             'id' => $id,
-            ...$request->all()
-        ]
+            ...$request->all(),
+        ],
     ]);
 });
