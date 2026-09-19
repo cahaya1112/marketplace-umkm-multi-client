@@ -4,6 +4,7 @@ use App\Providers\AppServiceProvider;
 use App\Providers\FortifyServiceProvider;
 
 return [
-    AppServiceProvider::class,
-    FortifyServiceProvider::class,
+    App\Providers\AppServiceProvider::class,
+    App\Modules\Auth\Providers\AuthServiceProvider::class,
+    App\Modules\Umkm\Providers\UmkmServiceProvider::class,
 ];
