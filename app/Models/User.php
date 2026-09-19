@@ -14,6 +14,9 @@ use Illuminate\Support\Str;
 use Laravel\Fortify\Contracts\PasskeyUser;
 use Laravel\Fortify\PasskeyAuthenticatable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
+use App\Modules\Umkm\Models\Umkm;
+use Laravel\Sanctum\HasApiTokens;
+
 
 /**
  * @property int $id
@@ -33,8 +36,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
 class User extends Authenticatable implements PasskeyUser
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable;
-
+    use HasFactory, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable, HasApiTokens;
     /**
      * Get the attributes that should be cast.
      *
@@ -48,9 +50,9 @@ class User extends Authenticatable implements PasskeyUser
         ];
     }
 
-    /**
-     * Get the user's initials
-     */
+    // Menyesuaikan dengan nama tabel tanpa 's'
+    protected $table = 'user';
+
     public function initials(): string
     {
         $initials = Str::initials($this->name, true);
@@ -59,4 +61,27 @@ class User extends Authenticatable implements PasskeyUser
             ? Str::substr($initials, 0, 1).Str::substr($initials, -1)
             : $initials;
     }
+
+    // Relasi One-to-One ke Model UMKM
+    public function umkm()
+    {
+        return $this->hasOne(Umkm::class, 'user_id');
+    }
+
+    // Helper Functions untuk Mengecek Role Pengguna
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isUmkmOwner(): bool
+    {
+        return $this->role === 'umkm_owner';
+    }
+
+    public function isCustomer(): bool
+    {
+        return $this->role === 'customer';
+    }
+
 }
