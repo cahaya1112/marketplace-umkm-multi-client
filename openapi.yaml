@@ -3,8 +3,7 @@ openapi: 3.0.3
 info:
   title: REST API Marketplace UMKM
   description: >
-    API untuk mengelola data marketplace UMKM.
-    Tahap awal hanya mencakup resource Produk.
+    Proyek ini merupakan platform marketplace berbasis web menggunakan Laravel yang memungkinkan banyak UMKM berjualan dalam satu sistem. Data setiap UMKM dipisahkan menggunakan client_id agar tidak tercampur. Admin Platform bertugas memverifikasi toko, sedangkan pemilik UMKM dapat mengelola profil, produk, kategori, dan stok.Fitur utama proyek ini adalah Custom Pesanan, yang memungkinkan pembeli memberikan permintaan khusus seperti ukuran, warna, motif, bahan, atau catatan pengerjaan. UMKM dapat menerima atau menolak permintaan tersebut.Sistem juga mendukung checkout dari beberapa toko dalam satu keranjang. Pesanan akan otomatis dibagi menjadi sub-order berdasarkan UMKM. Selain itu, tersedia pengelolaan pembayaran, status pesanan, laporan omzet, serta RESTful API yang dapat digunakan untuk terhubung dengan aplikasi mobile seperti Flutter atau Android.
   version: 1.0.0
 
 servers:
