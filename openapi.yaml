@@ -1,0 +1,350 @@
+openapi: 3.0.3
+
+info:
+  title: REST API Mahasiswa
+  description: >
+    API untuk mengelola data mahasiswa pada
+    Praktikum Interoperabilitas Pertemuan 6.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:3000
+    description: Local Development Server
+
+tags:
+  - name: Mahasiswa
+    description: Operasi data mahasiswa
+
+paths:
+
+  /api/mahasiswa:
+
+    get:
+      tags:
+        - Mahasiswa
+      summary: Mengambil seluruh data mahasiswa
+      description: Mengembalikan daftar seluruh mahasiswa.
+      operationId: getAllMahasiswa
+
+      responses:
+
+        '200':
+          description: Data mahasiswa berhasil ditemukan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MahasiswaListResponse'
+
+        '500':
+          description: Terjadi kesalahan pada server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+
+    post:
+      tags:
+        - Mahasiswa
+      summary: Menambahkan mahasiswa baru
+      description: Menambahkan satu data mahasiswa.
+      operationId: createMahasiswa
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MahasiswaInput'
+
+            example:
+              nim: "230101003"
+              nama: "Andi"
+              prodi: "TRPL"
+
+      responses:
+
+        '201':
+          description: Mahasiswa berhasil ditambahkan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MahasiswaResponse'
+
+        '400':
+          description: Data yang dikirim tidak valid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+        '500':
+          description: Terjadi kesalahan pada server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+
+  /api/mahasiswa/{id}:
+
+    get:
+      tags:
+        - Mahasiswa
+      summary: Mengambil mahasiswa berdasarkan ID
+      description: Mengembalikan satu data mahasiswa berdasarkan ID.
+      operationId: getMahasiswaById
+
+      parameters:
+
+        - name: id
+          in: path
+          description: ID mahasiswa
+          required: true
+          schema:
+            type: integer
+            example: 1
+
+      responses:
+
+        '200':
+          description: Data mahasiswa ditemukan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MahasiswaResponse'
+
+        '404':
+          description: Mahasiswa tidak ditemukan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+        '500':
+          description: Terjadi kesalahan pada server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+
+    patch:
+      tags:
+        - Mahasiswa
+      summary: Memperbarui data mahasiswa
+      description: Mengubah data mahasiswa berdasarkan ID.
+      operationId: updateMahasiswa
+
+      parameters:
+
+        - name: id
+          in: path
+          description: ID mahasiswa
+          required: true
+          schema:
+            type: integer
+            example: 1
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MahasiswaUpdateInput'
+
+            example:
+              nama: "Andi Pratama"
+              prodi: "TRPL"
+
+      responses:
+
+        '200':
+          description: Data mahasiswa berhasil diperbarui
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MahasiswaResponse'
+
+        '400':
+          description: Data yang dikirim tidak valid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+        '404':
+          description: Mahasiswa tidak ditemukan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+        '500':
+          description: Terjadi kesalahan pada server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+
+    delete:
+      tags:
+        - Mahasiswa
+      summary: Menghapus data mahasiswa
+      description: Menghapus mahasiswa berdasarkan ID.
+      operationId: deleteMahasiswa
+
+      parameters:
+
+        - name: id
+          in: path
+          description: ID mahasiswa
+          required: true
+          schema:
+            type: integer
+            example: 1
+
+      responses:
+
+        '200':
+          description: Mahasiswa berhasil dihapus
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteResponse'
+
+        '404':
+          description: Mahasiswa tidak ditemukan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+        '500':
+          description: Terjadi kesalahan pada server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+
+components:
+
+  schemas:
+
+    Mahasiswa:
+      type: object
+      properties:
+
+        id:
+          type: integer
+          example: 1
+
+        nim:
+          type: string
+          example: "230101001"
+
+        nama:
+          type: string
+          example: "Budi"
+
+        prodi:
+          type: string
+          example: "TRPL"
+
+
+    MahasiswaInput:
+      type: object
+      required:
+        - nim
+        - nama
+        - prodi
+
+      properties:
+
+        nim:
+          type: string
+          example: "230101003"
+
+        nama:
+          type: string
+          example: "Andi"
+
+        prodi:
+          type: string
+          example: "TRPL"
+
+
+    MahasiswaUpdateInput:
+      type: object
+
+      properties:
+
+        nim:
+          type: string
+          example: "230101003"
+
+        nama:
+          type: string
+          example: "Andi Pratama"
+
+        prodi:
+          type: string
+          example: "TRPL"
+
+
+    MahasiswaResponse:
+      type: object
+
+      properties:
+
+        status:
+          type: string
+          example: "success"
+
+        data:
+          $ref: '#/components/schemas/Mahasiswa'
+
+
+    MahasiswaListResponse:
+      type: object
+
+      properties:
+
+        status:
+          type: string
+          example: "success"
+
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Mahasiswa'
+
+
+    DeleteResponse:
+      type: object
+
+      properties:
+
+        status:
+          type: string
+          example: "success"
+
+        message:
+          type: string
+          example: "Mahasiswa berhasil dihapus"
+
+
+    ErrorResponse:
+      type: object
+
+      properties:
+
+        status:
+          type: string
+          example: "error"
+
+        message:
+          type: string
+          example: "Mahasiswa tidak ditemukan"
