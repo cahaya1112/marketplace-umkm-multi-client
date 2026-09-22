@@ -1,10 +1,9 @@
 openapi: 3.0.3
 
 info:
-  title: REST API Mahasiswa
+  title: REST API Marketplace UMKM
   description: >
-    API untuk mengelola data mahasiswa pada
-    Praktikum Interoperabilitas Pertemuan 6.
+    Proyek ini merupakan platform marketplace berbasis web menggunakan Laravel yang memungkinkan banyak UMKM berjualan dalam satu sistem. Data setiap UMKM dipisahkan menggunakan client_id agar tidak tercampur. Admin Platform bertugas memverifikasi toko, sedangkan pemilik UMKM dapat mengelola profil, produk, kategori, dan stok.Fitur utama proyek ini adalah Custom Pesanan, yang memungkinkan pembeli memberikan permintaan khusus seperti ukuran, warna, motif, bahan, atau catatan pengerjaan. UMKM dapat menerima atau menolak permintaan tersebut.Sistem juga mendukung checkout dari beberapa toko dalam satu keranjang. Pesanan akan otomatis dibagi menjadi sub-order berdasarkan UMKM. Selain itu, tersedia pengelolaan pembayaran, status pesanan, laporan omzet, serta RESTful API yang dapat digunakan untuk terhubung dengan aplikasi mobile seperti Flutter atau Android.
   version: 1.0.0
 
 servers:
@@ -12,72 +11,83 @@ servers:
     description: Local Development Server
 
 tags:
-  - name: Mahasiswa
-    description: Operasi data mahasiswa
+  - name: Produk
+    description: Operasi data produk UMKM
 
 paths:
-
-  /api/mahasiswa:
-
+  /api/produk:
     get:
       tags:
-        - Mahasiswa
-      summary: Mengambil seluruh data mahasiswa
-      description: Mengembalikan daftar seluruh mahasiswa.
-      operationId: getAllMahasiswa
-
+        - Produk
+      summary: Mengambil seluruh data produk
+      description: Mengembalikan daftar seluruh produk. Dapat difilter berdasarkan id_umkm dan status_produk.
+      operationId: getAllProduk
+      parameters:
+        - name: id_umkm
+          in: query
+          required: false
+          description: Filter produk berdasarkan ID UMKM
+          schema:
+            type: integer
+            example: 1
+        - name: status_produk
+          in: query
+          required: false
+          description: Filter produk berdasarkan status
+          schema:
+            type: string
+            enum:
+              - AKTIF
+              - NONAKTIF
+              - HABIS
+            example: AKTIF
       responses:
-
         '200':
-          description: Data mahasiswa berhasil ditemukan
+          description: Data produk berhasil ditemukan
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MahasiswaListResponse'
-
+                $ref: '#/components/schemas/ProdukListResponse'
         '500':
           description: Terjadi kesalahan pada server
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-
 
     post:
       tags:
-        - Mahasiswa
-      summary: Menambahkan mahasiswa baru
-      description: Menambahkan satu data mahasiswa.
-      operationId: createMahasiswa
-
+        - Produk
+      summary: Menambahkan produk baru
+      description: Menambahkan satu data produk baru.
+      operationId: createProduk
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/MahasiswaInput'
-
+              $ref: '#/components/schemas/ProdukInput'
             example:
-              nim: "230101003"
-              nama: "Andi"
-              prodi: "TRPL"
-
+              id_umkm: 1
+              nama_produk: "Kopi Arabika"
+              deskripsi: "Kopi arabika premium"
+              harga_asli: 45000
+              stok: 20
+              gambar: "https://example.com/kopi.jpg"
+              status_produk: "AKTIF"
       responses:
-
         '201':
-          description: Mahasiswa berhasil ditambahkan
+          description: Produk berhasil ditambahkan
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MahasiswaResponse'
-
+                $ref: '#/components/schemas/ProdukResponse'
         '400':
           description: Data yang dikirim tidak valid
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-
         '500':
           description: Terjadi kesalahan pada server
           content:
@@ -85,101 +95,85 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-
-  /api/mahasiswa/{id}:
-
+  /api/produk/{id}:
     get:
       tags:
-        - Mahasiswa
-      summary: Mengambil mahasiswa berdasarkan ID
-      description: Mengembalikan satu data mahasiswa berdasarkan ID.
-      operationId: getMahasiswaById
-
+        - Produk
+      summary: Mengambil produk berdasarkan ID
+      description: Mengembalikan satu data produk berdasarkan ID.
+      operationId: getProdukById
       parameters:
-
         - name: id
           in: path
-          description: ID mahasiswa
+          description: ID produk
           required: true
           schema:
             type: integer
             example: 1
-
       responses:
-
         '200':
-          description: Data mahasiswa ditemukan
+          description: Data produk ditemukan
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MahasiswaResponse'
-
+                $ref: '#/components/schemas/ProdukResponse'
         '404':
-          description: Mahasiswa tidak ditemukan
+          description: Produk tidak ditemukan
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-
         '500':
           description: Terjadi kesalahan pada server
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-
 
     patch:
       tags:
-        - Mahasiswa
-      summary: Memperbarui data mahasiswa
-      description: Mengubah data mahasiswa berdasarkan ID.
-      operationId: updateMahasiswa
-
+        - Produk
+      summary: Memperbarui data produk
+      description: Mengubah data produk berdasarkan ID.
+      operationId: updateProduk
       parameters:
-
         - name: id
           in: path
-          description: ID mahasiswa
+          description: ID produk
           required: true
           schema:
             type: integer
             example: 1
-
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/MahasiswaUpdateInput'
-
+              $ref: '#/components/schemas/ProdukUpdateInput'
             example:
-              nama: "Andi Pratama"
-              prodi: "TRPL"
-
+              nama_produk: "Kopi Arabika Premium"
+              harga_asli: 50000
+              stok: 15
+              status_produk: "AKTIF"
       responses:
-
         '200':
-          description: Data mahasiswa berhasil diperbarui
+          description: Data produk berhasil diperbarui
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MahasiswaResponse'
-
+                $ref: '#/components/schemas/ProdukResponse'
         '400':
           description: Data yang dikirim tidak valid
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-
         '404':
-          description: Mahasiswa tidak ditemukan
+          description: Produk tidak ditemukan
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-
         '500':
           description: Terjadi kesalahan pada server
           content:
@@ -187,40 +181,33 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-
     delete:
       tags:
-        - Mahasiswa
-      summary: Menghapus data mahasiswa
-      description: Menghapus mahasiswa berdasarkan ID.
-      operationId: deleteMahasiswa
-
+        - Produk
+      summary: Menghapus data produk
+      description: Menghapus produk berdasarkan ID.
+      operationId: deleteProduk
       parameters:
-
         - name: id
           in: path
-          description: ID mahasiswa
+          description: ID produk
           required: true
           schema:
             type: integer
             example: 1
-
       responses:
-
         '200':
-          description: Mahasiswa berhasil dihapus
+          description: Produk berhasil dihapus
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/DeleteResponse'
-
         '404':
-          description: Mahasiswa tidak ditemukan
+          description: Produk tidak ditemukan
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-
         '500':
           description: Terjadi kesalahan pada server
           content:
@@ -228,123 +215,142 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-
 components:
-
   schemas:
-
-    Mahasiswa:
+    Produk:
       type: object
       properties:
-
-        id:
+        id_produk:
           type: integer
           example: 1
-
-        nim:
+        id_umkm:
+          type: integer
+          example: 1
+        nama_produk:
           type: string
-          example: "230101001"
-
-        nama:
+          example: "Kopi Arabika"
+        deskripsi:
           type: string
-          example: "Budi"
-
-        prodi:
+          example: "Kopi arabika premium"
+        harga_asli:
+          type: number
+          format: double
+          example: 45000
+        stok:
+          type: integer
+          example: 20
+        gambar:
           type: string
-          example: "TRPL"
+          example: "https://example.com/kopi.jpg"
+        status_produk:
+          type: string
+          enum:
+            - AKTIF
+            - NONAKTIF
+            - HABIS
+          example: "AKTIF"
 
-
-    MahasiswaInput:
+    ProdukInput:
       type: object
       required:
-        - nim
-        - nama
-        - prodi
-
+        - id_umkm
+        - nama_produk
+        - harga_asli
+        - stok
       properties:
-
-        nim:
+        id_umkm:
+          type: integer
+          example: 1
+        nama_produk:
           type: string
-          example: "230101003"
-
-        nama:
+          example: "Kopi Arabika"
+        deskripsi:
           type: string
-          example: "Andi"
-
-        prodi:
+          example: "Kopi arabika premium"
+        harga_asli:
+          type: number
+          format: double
+          example: 45000
+        stok:
+          type: integer
+          example: 20
+        gambar:
           type: string
-          example: "TRPL"
+          example: "https://example.com/kopi.jpg"
+        status_produk:
+          type: string
+          enum:
+            - AKTIF
+            - NONAKTIF
+            - HABIS
+          example: "AKTIF"
 
-
-    MahasiswaUpdateInput:
+    ProdukUpdateInput:
       type: object
-
       properties:
-
-        nim:
+        id_umkm:
+          type: integer
+          example: 1
+        nama_produk:
           type: string
-          example: "230101003"
-
-        nama:
+          example: "Kopi Arabika Premium"
+        deskripsi:
           type: string
-          example: "Andi Pratama"
-
-        prodi:
+          example: "Kopi arabika premium"
+        harga_asli:
+          type: number
+          format: double
+          example: 50000
+        stok:
+          type: integer
+          example: 15
+        gambar:
           type: string
-          example: "TRPL"
+          example: "https://example.com/kopi.jpg"
+        status_produk:
+          type: string
+          enum:
+            - AKTIF
+            - NONAKTIF
+            - HABIS
+          example: "AKTIF"
 
-
-    MahasiswaResponse:
+    ProdukResponse:
       type: object
-
       properties:
-
         status:
           type: string
           example: "success"
-
         data:
-          $ref: '#/components/schemas/Mahasiswa'
+          $ref: '#/components/schemas/Produk'
 
-
-    MahasiswaListResponse:
+    ProdukListResponse:
       type: object
-
       properties:
-
         status:
           type: string
           example: "success"
-
         data:
           type: array
           items:
-            $ref: '#/components/schemas/Mahasiswa'
-
+            $ref: '#/components/schemas/Produk'
 
     DeleteResponse:
       type: object
-
       properties:
-
         status:
           type: string
           example: "success"
-
         message:
           type: string
-          example: "Mahasiswa berhasil dihapus"
-
+          example: "Produk berhasil dihapus"
 
     ErrorResponse:
       type: object
-
       properties:
-
         status:
           type: string
           example: "error"
-
         message:
           type: string
-          example: "Mahasiswa tidak ditemukan"
+          example: "Produk tidak ditemukan"
