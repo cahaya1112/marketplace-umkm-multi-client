@@ -1,9 +1,19 @@
 openapi: 3.0.3
 
 info:
+<<<<<<< Updated upstream
   title: REST API Marketplace UMKM
   description: >
     Proyek ini merupakan platform marketplace berbasis web menggunakan Laravel yang memungkinkan banyak UMKM berjualan dalam satu sistem. Data setiap UMKM dipisahkan menggunakan client_id agar tidak tercampur. Admin Platform bertugas memverifikasi toko, sedangkan pemilik UMKM dapat mengelola profil, produk, kategori, dan stok.Fitur utama proyek ini adalah Custom Pesanan, yang memungkinkan pembeli memberikan permintaan khusus seperti ukuran, warna, motif, bahan, atau catatan pengerjaan. UMKM dapat menerima atau menolak permintaan tersebut.Sistem juga mendukung checkout dari beberapa toko dalam satu keranjang. Pesanan akan otomatis dibagi menjadi sub-order berdasarkan UMKM. Selain itu, tersedia pengelolaan pembayaran, status pesanan, laporan omzet, serta RESTful API yang dapat digunakan untuk terhubung dengan aplikasi mobile seperti Flutter atau Android.
+=======
+  title: REST API Marketplace UMKM Multi-Client
+  description: >
+Proyek ini merupakan platform marketplace berbasis web menggunakan Laravel yang memungkinkan banyak UMKM berjualan dalam satu sistem. Data setiap UMKM dipisahkan menggunakan client_id agar tidak tercampur. Admin Platform bertugas memverifikasi toko, sedangkan pemilik UMKM dapat mengelola profil, produk, kategori, dan stok.
+
+Fitur utama proyek ini adalah Custom Pesanan, yang memungkinkan pembeli memberikan permintaan khusus seperti ukuran, warna, motif, bahan, atau catatan pengerjaan. UMKM dapat menerima atau menolak permintaan tersebut.
+
+Sistem juga mendukung checkout dari beberapa toko dalam satu keranjang. Pesanan akan otomatis dibagi menjadi sub-order berdasarkan UMKM. Selain itu, tersedia pengelolaan pembayaran, status pesanan, laporan omzet, serta RESTful API yang dapat digunakan untuk terhubung dengan aplikasi mobile seperti Flutter atau Android.
+>>>>>>> Stashed changes
   version: 1.0.0
 
 servers:
@@ -11,6 +21,7 @@ servers:
     description: Local Development Server
 
 tags:
+<<<<<<< Updated upstream
   - name: Produk
     description: Operasi data produk UMKM
 
@@ -41,13 +52,38 @@ paths:
               - NONAKTIF
               - HABIS
             example: AKTIF
+=======
+  - name: UMKM
+    description: Operasi data UMKM
+
+paths:
+
+  /api/umkm:
+
+    get:
+      tags:
+        - UMKM
+      summary: Mengambil seluruh data UMKM
+      description: Mengembalikan daftar seluruh UMKM.
+      operationId: getAllUMKM
+
+>>>>>>> Stashed changes
       responses:
         '200':
+<<<<<<< Updated upstream
           description: Data produk berhasil ditemukan
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProdukListResponse'
+=======
+          description: Data UMKM berhasil ditemukan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UMKMListResponse'
+
+>>>>>>> Stashed changes
         '500':
           description: Terjadi kesalahan pada server
           content:
@@ -57,16 +93,29 @@ paths:
 
     post:
       tags:
+<<<<<<< Updated upstream
         - Produk
       summary: Menambahkan produk baru
       description: Menambahkan satu data produk baru.
       operationId: createProduk
+=======
+        - UMKM
+      summary: Menambahkan UMKM baru
+      description: Menambahkan satu data UMKM.
+      operationId: createUMKM
+
+>>>>>>> Stashed changes
       requestBody:
         required: true
         content:
           application/json:
             schema:
+<<<<<<< Updated upstream
               $ref: '#/components/schemas/ProdukInput'
+=======
+              $ref: '#/components/schemas/UMKMInput'
+
+>>>>>>> Stashed changes
             example:
               id_umkm: 1
               nama_produk: "Kopi Arabika"
@@ -77,11 +126,20 @@ paths:
               status_produk: "AKTIF"
       responses:
         '201':
+<<<<<<< Updated upstream
           description: Produk berhasil ditambahkan
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProdukResponse'
+=======
+          description: UMKM berhasil ditambahkan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UMKMResponse'
+
+>>>>>>> Stashed changes
         '400':
           description: Data yang dikirim tidak valid
           content:
@@ -95,6 +153,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+<<<<<<< Updated upstream
   /api/produk/{id}:
     get:
       tags:
@@ -102,16 +161,33 @@ paths:
       summary: Mengambil produk berdasarkan ID
       description: Mengembalikan satu data produk berdasarkan ID.
       operationId: getProdukById
+=======
+
+  /api/umkm/{id}:
+
+    get:
+      tags:
+        - UMKM
+      summary: Mengambil UMKM berdasarkan ID
+      description: Mengembalikan satu data UMKM berdasarkan ID.
+      operationId: getUMKMById
+
+>>>>>>> Stashed changes
       parameters:
         - name: id
           in: path
+<<<<<<< Updated upstream
           description: ID produk
+=======
+          description: ID UMKM
+>>>>>>> Stashed changes
           required: true
           schema:
             type: integer
             example: 1
       responses:
         '200':
+<<<<<<< Updated upstream
           description: Data produk ditemukan
           content:
             application/json:
@@ -119,6 +195,16 @@ paths:
                 $ref: '#/components/schemas/ProdukResponse'
         '404':
           description: Produk tidak ditemukan
+=======
+          description: Data UMKM ditemukan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UMKMResponse'
+
+        '404':
+          description: UMKM tidak ditemukan
+>>>>>>> Stashed changes
           content:
             application/json:
               schema:
@@ -132,14 +218,26 @@ paths:
 
     patch:
       tags:
+<<<<<<< Updated upstream
         - Produk
       summary: Memperbarui data produk
       description: Mengubah data produk berdasarkan ID.
       operationId: updateProduk
+=======
+        - UMKM
+      summary: Memperbarui data UMKM
+      description: Mengubah data UMKM berdasarkan ID.
+      operationId: updateUMKM
+
+>>>>>>> Stashed changes
       parameters:
         - name: id
           in: path
+<<<<<<< Updated upstream
           description: ID produk
+=======
+          description: ID UMKM
+>>>>>>> Stashed changes
           required: true
           schema:
             type: integer
@@ -149,7 +247,12 @@ paths:
         content:
           application/json:
             schema:
+<<<<<<< Updated upstream
               $ref: '#/components/schemas/ProdukUpdateInput'
+=======
+              $ref: '#/components/schemas/UMKMUpdateInput'
+
+>>>>>>> Stashed changes
             example:
               nama_produk: "Kopi Arabika Premium"
               harga_asli: 50000
@@ -157,11 +260,20 @@ paths:
               status_produk: "AKTIF"
       responses:
         '200':
+<<<<<<< Updated upstream
           description: Data produk berhasil diperbarui
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProdukResponse'
+=======
+          description: Data UMKM berhasil diperbarui
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UMKMResponse'
+
+>>>>>>> Stashed changes
         '400':
           description: Data yang dikirim tidak valid
           content:
@@ -169,7 +281,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '404':
+<<<<<<< Updated upstream
           description: Produk tidak ditemukan
+=======
+          description: UMKM tidak ditemukan
+>>>>>>> Stashed changes
           content:
             application/json:
               schema:
@@ -183,27 +299,47 @@ paths:
 
     delete:
       tags:
+<<<<<<< Updated upstream
         - Produk
       summary: Menghapus data produk
       description: Menghapus produk berdasarkan ID.
       operationId: deleteProduk
+=======
+        - UMKM
+      summary: Menghapus data UMKM
+      description: Menghapus UMKM berdasarkan ID.
+      operationId: deleteUMKM
+
+>>>>>>> Stashed changes
       parameters:
         - name: id
           in: path
+<<<<<<< Updated upstream
           description: ID produk
+=======
+          description: ID UMKM
+>>>>>>> Stashed changes
           required: true
           schema:
             type: integer
             example: 1
       responses:
         '200':
+<<<<<<< Updated upstream
           description: Produk berhasil dihapus
+=======
+          description: UMKM berhasil dihapus
+>>>>>>> Stashed changes
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/DeleteResponse'
         '404':
+<<<<<<< Updated upstream
           description: Produk tidak ditemukan
+=======
+          description: UMKM tidak ditemukan
+>>>>>>> Stashed changes
           content:
             application/json:
               schema:
@@ -217,7 +353,12 @@ paths:
 
 components:
   schemas:
+<<<<<<< Updated upstream
     Produk:
+=======
+
+    UMKM:
+>>>>>>> Stashed changes
       type: object
       properties:
         id_produk:
@@ -250,7 +391,12 @@ components:
             - HABIS
           example: "AKTIF"
 
+<<<<<<< Updated upstream
     ProdukInput:
+=======
+
+    UMKMInput:
+>>>>>>> Stashed changes
       type: object
       required:
         - id_umkm
@@ -285,7 +431,12 @@ components:
             - HABIS
           example: "AKTIF"
 
+<<<<<<< Updated upstream
     ProdukUpdateInput:
+=======
+
+    UMKMUpdateInput:
+>>>>>>> Stashed changes
       type: object
       properties:
         id_umkm:
@@ -315,16 +466,28 @@ components:
             - HABIS
           example: "AKTIF"
 
+<<<<<<< Updated upstream
     ProdukResponse:
+=======
+
+    UMKMResponse:
+>>>>>>> Stashed changes
       type: object
       properties:
         status:
           type: string
           example: "success"
         data:
+<<<<<<< Updated upstream
           $ref: '#/components/schemas/Produk'
 
     ProdukListResponse:
+=======
+          $ref: '#/components/schemas/UMKM'
+
+
+    UMKMListResponse:
+>>>>>>> Stashed changes
       type: object
       properties:
         status:
@@ -333,7 +496,12 @@ components:
         data:
           type: array
           items:
+<<<<<<< Updated upstream
             $ref: '#/components/schemas/Produk'
+=======
+            $ref: '#/components/schemas/UMKM'
+
+>>>>>>> Stashed changes
 
     DeleteResponse:
       type: object
@@ -343,7 +511,12 @@ components:
           example: "success"
         message:
           type: string
+<<<<<<< Updated upstream
           example: "Produk berhasil dihapus"
+=======
+          example: "UMKM berhasil dihapus"
+
+>>>>>>> Stashed changes
 
     ErrorResponse:
       type: object
@@ -353,4 +526,8 @@ components:
           example: "error"
         message:
           type: string
+<<<<<<< Updated upstream
           example: "Produk tidak ditemukan"
+=======
+          example: "UMKM tidak ditemukan"
+>>>>>>> Stashed changes
