@@ -9,4 +9,5 @@ return [
     App\Modules\Auth\Providers\AuthServiceProvider::class,
     App\Modules\Umkm\Providers\UmkmServiceProvider::class,
     App\Modules\Catalog\Providers\CatalogServiceProvider::class,
+    App\Modules\CustomRequest\Providers\CustomRequestServiceProvider::class,
 ];
