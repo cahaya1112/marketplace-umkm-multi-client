@@ -15,11 +15,34 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // Data Admin Marketplace
+        User::updateOrCreate(
+            ['email' => 'admin@marketplace.com'],
+            [
+                'name'     => 'Admin Marketplace',
+                'password' => bcrypt('password123'),
+                'role'     => 'admin',
+            ]
+        );
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        // Data Pemilik UMKM
+        User::updateOrCreate(
+            ['email' => 'penjual@marketplace.com'],
+            [
+                'name'     => 'Pemilik UMKM',
+                'password' => bcrypt('password123'),
+                'role'     => 'umkm_owner', // <--- Disesuaikan ke 'umkm_owner'
+            ]
+        );
+
+        // Data Customer / Pembeli
+        User::updateOrCreate(
+            ['email' => 'customer@marketplace.com'],
+            [
+                'name'     => 'Customer Pembeli',
+                'password' => bcrypt('password123'),
+                'role'     => 'customer',
+            ]
+        );
     }
 }
