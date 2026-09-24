@@ -10,4 +10,6 @@ return [
     App\Modules\Umkm\Providers\UmkmServiceProvider::class,
     App\Modules\Catalog\Providers\CatalogServiceProvider::class,
     App\Modules\CustomRequest\Providers\CustomRequestServiceProvider::class,
+    App\Modules\Cart\Providers\CartServiceProvider::class,
+    App\Modules\Payment\Providers\PaymentServiceProvider::class,
 ];
