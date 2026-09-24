@@ -12,4 +12,5 @@ return [
     App\Modules\CustomRequest\Providers\CustomRequestServiceProvider::class,
     App\Modules\Cart\Providers\CartServiceProvider::class,
     App\Modules\Payment\Providers\PaymentServiceProvider::class,
+    App\Modules\Ordering\Providers\OrderingServiceProvider::class,
 ];
