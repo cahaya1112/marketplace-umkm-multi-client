@@ -34,7 +34,11 @@ use Laravel\Sanctum\HasApiTokens;
 #[Fillable(['name', 'email', 'password'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable implements PasskeyUser
+
 {
+
+    protected $table = 'user';
+
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable, HasApiTokens;
     /**
@@ -51,7 +55,7 @@ class User extends Authenticatable implements PasskeyUser
     }
 
     // Menyesuaikan dengan nama tabel tanpa 's'
-    protected $table = 'user';
+    
 
     public function initials(): string
     {
@@ -85,3 +89,4 @@ class User extends Authenticatable implements PasskeyUser
     }
 
 }
+

@@ -11,55 +11,566 @@ servers:
     description: Local Development Server
 
 tags:
+  - name: Pembeli
+    description: Operasi data pembeli
+  - name: Admin UMKM
+    description: Operasi data admin UMKM
+  - name: Super Admin
+    description: Operasi data super admin
+  - name: UMKM
+    description: Operasi data UMKM
   - name: Produk
-    description: Operasi data produk UMKM
+    description: Operasi data produk
+  - name: Kategori
+    description: Operasi data kategori
+  - name: Keranjang
+    description: Operasi data keranjang
+  - name: Pesanan Induk
+    description: Operasi data pesanan induk
+  - name: Pesanan UMKM
+    description: Operasi data pesanan per UMKM
+  - name: Item Pesanan
+    description: Operasi data item pesanan
+  - name: Permintaan Custom
+    description: Operasi data permintaan custom
+  - name: Pembayaran
+    description: Operasi data pembayaran
+  - name: Riwayat Status Pesanan
+    description: Operasi data riwayat status pesanan
 
 paths:
+
+  /api/pembeli:
+    get:
+      tags:
+        - Pembeli
+      summary: Mengambil seluruh data pembeli
+      operationId: getAllPembeli
+      responses:
+        '200':
+          description: Data pembeli berhasil ditemukan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Pembeli'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    post:
+      tags:
+        - Pembeli
+      summary: Menambahkan pembeli baru
+      operationId: createPembeli
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PembeliInput'
+      responses:
+        '201':
+          description: Pembeli berhasil ditambahkan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/Pembeli'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/pembeli/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: ID pembeli
+        schema:
+          type: integer
+          example: 1
+    get:
+      tags:
+        - Pembeli
+      summary: Mengambil pembeli berdasarkan ID
+      operationId: getPembeliById
+      responses:
+        '200':
+          description: Data pembeli ditemukan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/Pembeli'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    patch:
+      tags:
+        - Pembeli
+      summary: Memperbarui data pembeli
+      operationId: updatePembeli
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PembeliUpdateInput'
+      responses:
+        '200':
+          description: Data pembeli berhasil diperbarui
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/Pembeli'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    delete:
+      tags:
+        - Pembeli
+      summary: Menghapus data pembeli
+      operationId: deletePembeli
+      responses:
+        '200':
+          $ref: '#/components/responses/DeleteResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/admin-umkm:
+    get:
+      tags:
+        - Admin UMKM
+      summary: Mengambil seluruh data admin UMKM
+      operationId: getAllAdminUmkm
+      responses:
+        '200':
+          description: Data admin UMKM berhasil ditemukan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AdminUmkm'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    post:
+      tags:
+        - Admin UMKM
+      summary: Menambahkan admin UMKM baru
+      operationId: createAdminUmkm
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminUmkmInput'
+      responses:
+        '201':
+          description: Admin UMKM berhasil ditambahkan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/AdminUmkm'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/admin-umkm/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: ID admin UMKM
+        schema:
+          type: integer
+          example: 1
+    get:
+      tags:
+        - Admin UMKM
+      summary: Mengambil admin UMKM berdasarkan ID
+      operationId: getAdminUmkmById
+      responses:
+        '200':
+          description: Data admin UMKM ditemukan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/AdminUmkm'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    patch:
+      tags:
+        - Admin UMKM
+      summary: Memperbarui data admin UMKM
+      operationId: updateAdminUmkm
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminUmkmUpdateInput'
+      responses:
+        '200':
+          description: Data admin UMKM berhasil diperbarui
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/AdminUmkm'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    delete:
+      tags:
+        - Admin UMKM
+      summary: Menghapus data admin UMKM
+      operationId: deleteAdminUmkm
+      responses:
+        '200':
+          $ref: '#/components/responses/DeleteResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/super-admin:
+    get:
+      tags:
+        - Super Admin
+      summary: Mengambil seluruh data super admin
+      operationId: getAllSuperAdmin
+      responses:
+        '200':
+          description: Data super admin berhasil ditemukan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SuperAdmin'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    post:
+      tags:
+        - Super Admin
+      summary: Menambahkan super admin baru
+      operationId: createSuperAdmin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SuperAdminInput'
+      responses:
+        '201':
+          description: Super admin berhasil ditambahkan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/SuperAdmin'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/super-admin/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: ID super admin
+        schema:
+          type: integer
+          example: 1
+    get:
+      tags:
+        - Super Admin
+      summary: Mengambil super admin berdasarkan ID
+      operationId: getSuperAdminById
+      responses:
+        '200':
+          description: Data super admin ditemukan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/SuperAdmin'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    patch:
+      tags:
+        - Super Admin
+      summary: Memperbarui data super admin
+      operationId: updateSuperAdmin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SuperAdminUpdateInput'
+      responses:
+        '200':
+          description: Data super admin berhasil diperbarui
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/SuperAdmin'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    delete:
+      tags:
+        - Super Admin
+      summary: Menghapus data super admin
+      operationId: deleteSuperAdmin
+      responses:
+        '200':
+          $ref: '#/components/responses/DeleteResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/umkm:
+    get:
+      tags:
+        - UMKM
+      summary: Mengambil seluruh data UMKM
+      operationId: getAllUmkm
+      responses:
+        '200':
+          description: Data UMKM berhasil ditemukan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Umkm'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    post:
+      tags:
+        - UMKM
+      summary: Menambahkan UMKM baru
+      operationId: createUmkm
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UmkmInput'
+      responses:
+        '201':
+          description: UMKM berhasil ditambahkan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/Umkm'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/umkm/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: ID UMKM
+        schema:
+          type: integer
+          example: 1
+    get:
+      tags:
+        - UMKM
+      summary: Mengambil UMKM berdasarkan ID
+      operationId: getUmkmById
+      responses:
+        '200':
+          description: Data UMKM ditemukan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/Umkm'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    patch:
+      tags:
+        - UMKM
+      summary: Memperbarui data UMKM
+      operationId: updateUmkm
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UmkmUpdateInput'
+      responses:
+        '200':
+          description: Data UMKM berhasil diperbarui
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/Umkm'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    delete:
+      tags:
+        - UMKM
+      summary: Menghapus data UMKM
+      operationId: deleteUmkm
+      responses:
+        '200':
+          $ref: '#/components/responses/DeleteResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
   /api/produk:
     get:
       tags:
         - Produk
       summary: Mengambil seluruh data produk
-      description: Mengembalikan daftar seluruh produk. Dapat difilter berdasarkan id_umkm dan status_produk.
       operationId: getAllProduk
-      parameters:
-        - name: id_umkm
-          in: query
-          required: false
-          description: Filter produk berdasarkan ID UMKM
-          schema:
-            type: integer
-            example: 1
-        - name: status_produk
-          in: query
-          required: false
-          description: Filter produk berdasarkan status
-          schema:
-            type: string
-            enum:
-              - AKTIF
-              - NONAKTIF
-              - HABIS
-            example: AKTIF
       responses:
         '200':
           description: Data produk berhasil ditemukan
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProdukListResponse'
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Produk'
         '500':
-          description: Terjadi kesalahan pada server
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-
+          $ref: '#/components/responses/ServerError'
     post:
       tags:
         - Produk
       summary: Menambahkan produk baru
-      description: Menambahkan satu data produk baru.
       operationId: createProduk
       requestBody:
         required: true
@@ -67,156 +578,1354 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/ProdukInput'
-            example:
-              id_umkm: 1
-              nama_produk: "Kopi Arabika"
-              deskripsi: "Kopi arabika premium"
-              harga_asli: 45000
-              stok: 20
-              gambar: "https://example.com/kopi.jpg"
-              status_produk: "AKTIF"
       responses:
         '201':
           description: Produk berhasil ditambahkan
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProdukResponse'
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/Produk'
         '400':
-          description: Data yang dikirim tidak valid
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+          $ref: '#/components/responses/BadRequest'
         '500':
-          description: Terjadi kesalahan pada server
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+          $ref: '#/components/responses/ServerError'
 
   /api/produk/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: ID produk
+        schema:
+          type: integer
+          example: 1
     get:
       tags:
         - Produk
       summary: Mengambil produk berdasarkan ID
-      description: Mengembalikan satu data produk berdasarkan ID.
       operationId: getProdukById
-      parameters:
-        - name: id
-          in: path
-          description: ID produk
-          required: true
-          schema:
-            type: integer
-            example: 1
       responses:
         '200':
           description: Data produk ditemukan
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProdukResponse'
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/Produk'
         '404':
-          description: Produk tidak ditemukan
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+          $ref: '#/components/responses/NotFound'
         '500':
-          description: Terjadi kesalahan pada server
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-
+          $ref: '#/components/responses/ServerError'
     patch:
       tags:
         - Produk
       summary: Memperbarui data produk
-      description: Mengubah data produk berdasarkan ID.
       operationId: updateProduk
-      parameters:
-        - name: id
-          in: path
-          description: ID produk
-          required: true
-          schema:
-            type: integer
-            example: 1
       requestBody:
         required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/ProdukUpdateInput'
-            example:
-              nama_produk: "Kopi Arabika Premium"
-              harga_asli: 50000
-              stok: 15
-              status_produk: "AKTIF"
       responses:
         '200':
           description: Data produk berhasil diperbarui
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProdukResponse'
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/Produk'
         '400':
-          description: Data yang dikirim tidak valid
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+          $ref: '#/components/responses/BadRequest'
         '404':
-          description: Produk tidak ditemukan
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+          $ref: '#/components/responses/NotFound'
         '500':
-          description: Terjadi kesalahan pada server
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-
+          $ref: '#/components/responses/ServerError'
     delete:
       tags:
         - Produk
       summary: Menghapus data produk
-      description: Menghapus produk berdasarkan ID.
       operationId: deleteProduk
-      parameters:
-        - name: id
-          in: path
-          description: ID produk
-          required: true
-          schema:
-            type: integer
-            example: 1
       responses:
         '200':
-          description: Produk berhasil dihapus
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DeleteResponse'
+          $ref: '#/components/responses/DeleteResponse'
         '404':
-          description: Produk tidak ditemukan
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+          $ref: '#/components/responses/NotFound'
         '500':
-          description: Terjadi kesalahan pada server
+          $ref: '#/components/responses/ServerError'
+
+  /api/kategori:
+    get:
+      tags:
+        - Kategori
+      summary: Mengambil seluruh data kategori
+      operationId: getAllKategori
+      responses:
+        '200':
+          description: Data kategori berhasil ditemukan
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Kategori'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    post:
+      tags:
+        - Kategori
+      summary: Menambahkan kategori baru
+      operationId: createKategori
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KategoriInput'
+      responses:
+        '201':
+          description: Kategori berhasil ditambahkan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/Kategori'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/kategori/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: ID kategori
+        schema:
+          type: integer
+          example: 1
+    get:
+      tags:
+        - Kategori
+      summary: Mengambil kategori berdasarkan ID
+      operationId: getKategoriById
+      responses:
+        '200':
+          description: Data kategori ditemukan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/Kategori'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    patch:
+      tags:
+        - Kategori
+      summary: Memperbarui data kategori
+      operationId: updateKategori
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KategoriUpdateInput'
+      responses:
+        '200':
+          description: Data kategori berhasil diperbarui
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/Kategori'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    delete:
+      tags:
+        - Kategori
+      summary: Menghapus data kategori
+      operationId: deleteKategori
+      responses:
+        '200':
+          $ref: '#/components/responses/DeleteResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/keranjang:
+    get:
+      tags:
+        - Keranjang
+      summary: Mengambil seluruh data keranjang
+      operationId: getAllKeranjang
+      responses:
+        '200':
+          description: Data keranjang berhasil ditemukan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Keranjang'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    post:
+      tags:
+        - Keranjang
+      summary: Menambahkan keranjang baru
+      operationId: createKeranjang
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KeranjangInput'
+      responses:
+        '201':
+          description: Keranjang berhasil ditambahkan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/Keranjang'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/keranjang/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: ID keranjang
+        schema:
+          type: integer
+          example: 1
+    get:
+      tags:
+        - Keranjang
+      summary: Mengambil keranjang berdasarkan ID
+      operationId: getKeranjangById
+      responses:
+        '200':
+          description: Data keranjang ditemukan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/Keranjang'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    patch:
+      tags:
+        - Keranjang
+      summary: Memperbarui data keranjang
+      operationId: updateKeranjang
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KeranjangUpdateInput'
+      responses:
+        '200':
+          description: Data keranjang berhasil diperbarui
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/Keranjang'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    delete:
+      tags:
+        - Keranjang
+      summary: Menghapus data keranjang
+      operationId: deleteKeranjang
+      responses:
+        '200':
+          $ref: '#/components/responses/DeleteResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/pesanan-induk:
+    get:
+      tags:
+        - Pesanan Induk
+      summary: Mengambil seluruh data pesanan induk
+      operationId: getAllPesananInduk
+      responses:
+        '200':
+          description: Data pesanan induk berhasil ditemukan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PesananInduk'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    post:
+      tags:
+        - Pesanan Induk
+      summary: Menambahkan pesanan induk baru
+      operationId: createPesananInduk
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PesananIndukInput'
+      responses:
+        '201':
+          description: Pesanan induk berhasil ditambahkan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/PesananInduk'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/pesanan-induk/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: ID pesanan induk
+        schema:
+          type: integer
+          example: 1
+    get:
+      tags:
+        - Pesanan Induk
+      summary: Mengambil pesanan induk berdasarkan ID
+      operationId: getPesananIndukById
+      responses:
+        '200':
+          description: Data pesanan induk ditemukan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/PesananInduk'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    patch:
+      tags:
+        - Pesanan Induk
+      summary: Memperbarui data pesanan induk
+      operationId: updatePesananInduk
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PesananIndukUpdateInput'
+      responses:
+        '200':
+          description: Data pesanan induk berhasil diperbarui
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/PesananInduk'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    delete:
+      tags:
+        - Pesanan Induk
+      summary: Menghapus data pesanan induk
+      operationId: deletePesananInduk
+      responses:
+        '200':
+          $ref: '#/components/responses/DeleteResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/pesanan-umkm:
+    get:
+      tags:
+        - Pesanan UMKM
+      summary: Mengambil seluruh data pesanan UMKM
+      operationId: getAllPesananUmkm
+      responses:
+        '200':
+          description: Data pesanan UMKM berhasil ditemukan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PesananUmkm'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    post:
+      tags:
+        - Pesanan UMKM
+      summary: Menambahkan pesanan UMKM baru
+      operationId: createPesananUmkm
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PesananUmkmInput'
+      responses:
+        '201':
+          description: Pesanan UMKM berhasil ditambahkan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/PesananUmkm'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/pesanan-umkm/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: ID pesanan UMKM
+        schema:
+          type: integer
+          example: 1
+    get:
+      tags:
+        - Pesanan UMKM
+      summary: Mengambil pesanan UMKM berdasarkan ID
+      operationId: getPesananUmkmById
+      responses:
+        '200':
+          description: Data pesanan UMKM ditemukan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/PesananUmkm'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    patch:
+      tags:
+        - Pesanan UMKM
+      summary: Memperbarui data pesanan UMKM
+      operationId: updatePesananUmkm
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PesananUmkmUpdateInput'
+      responses:
+        '200':
+          description: Data pesanan UMKM berhasil diperbarui
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/PesananUmkm'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    delete:
+      tags:
+        - Pesanan UMKM
+      summary: Menghapus data pesanan UMKM
+      operationId: deletePesananUmkm
+      responses:
+        '200':
+          $ref: '#/components/responses/DeleteResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/item-pesanan:
+    get:
+      tags:
+        - Item Pesanan
+      summary: Mengambil seluruh data item pesanan
+      operationId: getAllItemPesanan
+      responses:
+        '200':
+          description: Data item pesanan berhasil ditemukan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ItemPesanan'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    post:
+      tags:
+        - Item Pesanan
+      summary: Menambahkan item pesanan baru
+      operationId: createItemPesanan
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ItemPesananInput'
+      responses:
+        '201':
+          description: Item pesanan berhasil ditambahkan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/ItemPesanan'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/item-pesanan/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: ID item pesanan
+        schema:
+          type: integer
+          example: 1
+    get:
+      tags:
+        - Item Pesanan
+      summary: Mengambil item pesanan berdasarkan ID
+      operationId: getItemPesananById
+      responses:
+        '200':
+          description: Data item pesanan ditemukan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/ItemPesanan'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    patch:
+      tags:
+        - Item Pesanan
+      summary: Memperbarui data item pesanan
+      operationId: updateItemPesanan
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ItemPesananUpdateInput'
+      responses:
+        '200':
+          description: Data item pesanan berhasil diperbarui
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/ItemPesanan'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    delete:
+      tags:
+        - Item Pesanan
+      summary: Menghapus data item pesanan
+      operationId: deleteItemPesanan
+      responses:
+        '200':
+          $ref: '#/components/responses/DeleteResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/permintaan-custom:
+    get:
+      tags:
+        - Permintaan Custom
+      summary: Mengambil seluruh data permintaan custom
+      operationId: getAllPermintaanCustom
+      responses:
+        '200':
+          description: Data permintaan custom berhasil ditemukan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PermintaanCustom'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    post:
+      tags:
+        - Permintaan Custom
+      summary: Menambahkan permintaan custom baru
+      operationId: createPermintaanCustom
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PermintaanCustomInput'
+      responses:
+        '201':
+          description: Permintaan custom berhasil ditambahkan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/PermintaanCustom'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/permintaan-custom/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: ID permintaan custom
+        schema:
+          type: integer
+          example: 1
+    get:
+      tags:
+        - Permintaan Custom
+      summary: Mengambil permintaan custom berdasarkan ID
+      operationId: getPermintaanCustomById
+      responses:
+        '200':
+          description: Data permintaan custom ditemukan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/PermintaanCustom'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    patch:
+      tags:
+        - Permintaan Custom
+      summary: Memperbarui data permintaan custom
+      operationId: updatePermintaanCustom
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PermintaanCustomUpdateInput'
+      responses:
+        '200':
+          description: Data permintaan custom berhasil diperbarui
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/PermintaanCustom'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    delete:
+      tags:
+        - Permintaan Custom
+      summary: Menghapus data permintaan custom
+      operationId: deletePermintaanCustom
+      responses:
+        '200':
+          $ref: '#/components/responses/DeleteResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/pembayaran:
+    get:
+      tags:
+        - Pembayaran
+      summary: Mengambil seluruh data pembayaran
+      operationId: getAllPembayaran
+      responses:
+        '200':
+          description: Data pembayaran berhasil ditemukan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Pembayaran'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    post:
+      tags:
+        - Pembayaran
+      summary: Menambahkan pembayaran baru
+      operationId: createPembayaran
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PembayaranInput'
+      responses:
+        '201':
+          description: Pembayaran berhasil ditambahkan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/Pembayaran'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/pembayaran/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: ID pembayaran
+        schema:
+          type: integer
+          example: 1
+    get:
+      tags:
+        - Pembayaran
+      summary: Mengambil pembayaran berdasarkan ID
+      operationId: getPembayaranById
+      responses:
+        '200':
+          description: Data pembayaran ditemukan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/Pembayaran'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    patch:
+      tags:
+        - Pembayaran
+      summary: Memperbarui data pembayaran
+      operationId: updatePembayaran
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PembayaranUpdateInput'
+      responses:
+        '200':
+          description: Data pembayaran berhasil diperbarui
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/Pembayaran'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    delete:
+      tags:
+        - Pembayaran
+      summary: Menghapus data pembayaran
+      operationId: deletePembayaran
+      responses:
+        '200':
+          $ref: '#/components/responses/DeleteResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/riwayat-status-pesanan:
+    get:
+      tags:
+        - Riwayat Status Pesanan
+      summary: Mengambil seluruh data riwayat status pesanan
+      operationId: getAllRiwayatStatusPesanan
+      responses:
+        '200':
+          description: Data riwayat status pesanan berhasil ditemukan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/RiwayatStatusPesanan'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    post:
+      tags:
+        - Riwayat Status Pesanan
+      summary: Menambahkan riwayat status pesanan baru
+      operationId: createRiwayatStatusPesanan
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RiwayatStatusPesananInput'
+      responses:
+        '201':
+          description: Riwayat status pesanan berhasil ditambahkan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/RiwayatStatusPesanan'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/riwayat-status-pesanan/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: ID riwayat status pesanan
+        schema:
+          type: integer
+          example: 1
+    get:
+      tags:
+        - Riwayat Status Pesanan
+      summary: Mengambil riwayat status pesanan berdasarkan ID
+      operationId: getRiwayatStatusPesananById
+      responses:
+        '200':
+          description: Data riwayat status pesanan ditemukan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/RiwayatStatusPesanan'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    patch:
+      tags:
+        - Riwayat Status Pesanan
+      summary: Memperbarui data riwayat status pesanan
+      operationId: updateRiwayatStatusPesanan
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RiwayatStatusPesananUpdateInput'
+      responses:
+        '200':
+          description: Data riwayat status pesanan berhasil diperbarui
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/RiwayatStatusPesanan'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    delete:
+      tags:
+        - Riwayat Status Pesanan
+      summary: Menghapus data riwayat status pesanan
+      operationId: deleteRiwayatStatusPesanan
+      responses:
+        '200':
+          $ref: '#/components/responses/DeleteResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
 
 components:
+
+  responses:
+    BadRequest:
+      description: Data yang dikirim tidak valid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Data tidak ditemukan
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    ServerError:
+      description: Terjadi kesalahan pada server
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    DeleteResponse:
+      description: Data berhasil dihapus
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DeleteResponse'
+
   schemas:
+
+    Pembeli:
+      type: object
+      properties:
+        id_pembeli:
+          type: integer
+          example: 1
+        nama:
+          type: string
+          example: Budi
+        email:
+          type: string
+          format: email
+          example: budi@example.com
+        kata_sandi_hash:
+          type: string
+          example: hashed_password
+        no_telepon:
+          type: string
+          example: "08123456789"
+        alamat:
+          type: string
+          example: Jl. Contoh No. 1
+
+    PembeliInput:
+      type: object
+      required: [nama, email, kata_sandi_hash]
+      properties:
+        nama:
+          type: string
+        email:
+          type: string
+          format: email
+        kata_sandi_hash:
+          type: string
+        no_telepon:
+          type: string
+        alamat:
+          type: string
+
+    PembeliUpdateInput:
+      type: object
+      properties:
+        nama:
+          type: string
+        email:
+          type: string
+          format: email
+        kata_sandi_hash:
+          type: string
+        no_telepon:
+          type: string
+        alamat:
+          type: string
+
+    AdminUmkm:
+      type: object
+      properties:
+        id_admin_umkm:
+          type: integer
+          example: 1
+        id_umkm:
+          type: integer
+          example: 1
+        nama:
+          type: string
+          example: Admin UMKM A
+        email:
+          type: string
+          format: email
+          example: admin@umkm.com
+        kata_sandi_hash:
+          type: string
+          example: hashed_password
+
+    AdminUmkmInput:
+      type: object
+      required: [id_umkm, nama, email, kata_sandi_hash]
+      properties:
+        id_umkm:
+          type: integer
+        nama:
+          type: string
+        email:
+          type: string
+          format: email
+        kata_sandi_hash:
+          type: string
+
+    AdminUmkmUpdateInput:
+      type: object
+      properties:
+        id_umkm:
+          type: integer
+        nama:
+          type: string
+        email:
+          type: string
+          format: email
+        kata_sandi_hash:
+          type: string
+
+    SuperAdmin:
+      type: object
+      properties:
+        id_super_admin:
+          type: integer
+          example: 1
+        nama:
+          type: string
+          example: Super Admin
+        email:
+          type: string
+          format: email
+          example: superadmin@example.com
+        kata_sandi_hash:
+          type: string
+          example: hashed_password
+
+    SuperAdminInput:
+      type: object
+      required: [nama, email, kata_sandi_hash]
+      properties:
+        nama:
+          type: string
+        email:
+          type: string
+          format: email
+        kata_sandi_hash:
+          type: string
+
+    SuperAdminUpdateInput:
+      type: object
+      properties:
+        nama:
+          type: string
+        email:
+          type: string
+          format: email
+        kata_sandi_hash:
+          type: string
+
+    Umkm:
+      type: object
+      properties:
+        id_umkm:
+          type: integer
+          example: 1
+        nama_umkm:
+          type: string
+          example: UMKM Maju Jaya
+        deskripsi:
+          type: string
+          example: Menjual makanan ringan
+        alamat:
+          type: string
+          example: Jl. UMKM No. 1
+        no_telepon:
+          type: string
+          example: "08123456789"
+        status_verifikasi:
+          type: string
+          enum: [MENUNGGU, AKTIF, DITOLAK, NONAKTIF]
+          example: MENUNGGU
+        id_super_admin_verifikator:
+          type: integer
+          nullable: true
+          example: 1
+        tanggal_verifikasi:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2026-01-01T10:00:00Z"
+
+    UmkmInput:
+      type: object
+      required: [nama_umkm]
+      properties:
+        nama_umkm:
+          type: string
+        deskripsi:
+          type: string
+        alamat:
+          type: string
+        no_telepon:
+          type: string
+        status_verifikasi:
+          type: string
+          enum: [MENUNGGU, AKTIF, DITOLAK, NONAKTIF]
+        id_super_admin_verifikator:
+          type: integer
+          nullable: true
+        tanggal_verifikasi:
+          type: string
+          format: date-time
+          nullable: true
+
+    UmkmUpdateInput:
+      type: object
+      properties:
+        nama_umkm:
+          type: string
+        deskripsi:
+          type: string
+        alamat:
+          type: string
+        no_telepon:
+          type: string
+        status_verifikasi:
+          type: string
+          enum: [MENUNGGU, AKTIF, DITOLAK, NONAKTIF]
+        id_super_admin_verifikator:
+          type: integer
+          nullable: true
+        tanggal_verifikasi:
+          type: string
+          format: date-time
+          nullable: true
+
     Produk:
       type: object
       properties:
@@ -228,129 +1937,614 @@ components:
           example: 1
         nama_produk:
           type: string
-          example: "Kopi Arabika"
+          example: Keripik Pisang
         deskripsi:
           type: string
-          example: "Kopi arabika premium"
+          example: Keripik pisang renyah
         harga_asli:
           type: number
           format: double
-          example: 45000
+          example: 15000
         stok:
           type: integer
-          example: 20
+          example: 100
         gambar:
           type: string
-          example: "https://example.com/kopi.jpg"
+          example: /uploads/keripik.jpg
         status_produk:
           type: string
-          enum:
-            - AKTIF
-            - NONAKTIF
-            - HABIS
-          example: "AKTIF"
+          enum: [AKTIF, NONAKTIF, HABIS]
+          example: AKTIF
 
     ProdukInput:
       type: object
-      required:
-        - id_umkm
-        - nama_produk
-        - harga_asli
-        - stok
+      required: [id_umkm, nama_produk, harga_asli, stok]
       properties:
         id_umkm:
           type: integer
-          example: 1
         nama_produk:
           type: string
-          example: "Kopi Arabika"
         deskripsi:
           type: string
-          example: "Kopi arabika premium"
         harga_asli:
           type: number
           format: double
-          example: 45000
         stok:
           type: integer
-          example: 20
         gambar:
           type: string
-          example: "https://example.com/kopi.jpg"
         status_produk:
           type: string
-          enum:
-            - AKTIF
-            - NONAKTIF
-            - HABIS
-          example: "AKTIF"
+          enum: [AKTIF, NONAKTIF, HABIS]
 
     ProdukUpdateInput:
       type: object
       properties:
         id_umkm:
           type: integer
-          example: 1
         nama_produk:
           type: string
-          example: "Kopi Arabika Premium"
         deskripsi:
           type: string
-          example: "Kopi arabika premium"
         harga_asli:
           type: number
           format: double
-          example: 50000
         stok:
           type: integer
-          example: 15
         gambar:
           type: string
-          example: "https://example.com/kopi.jpg"
         status_produk:
           type: string
-          enum:
-            - AKTIF
-            - NONAKTIF
-            - HABIS
-          example: "AKTIF"
+          enum: [AKTIF, NONAKTIF, HABIS]
 
-    ProdukResponse:
+    Kategori:
       type: object
       properties:
-        status:
+        id_kategori:
+          type: integer
+          example: 1
+        nama_kategori:
           type: string
-          example: "success"
-        data:
-          $ref: '#/components/schemas/Produk'
+          example: Makanan
+        id_produk:
+          type: integer
+          example: 1
 
-    ProdukListResponse:
+    KategoriInput:
+      type: object
+      required: [nama_kategori, id_produk]
+      properties:
+        nama_kategori:
+          type: string
+        id_produk:
+          type: integer
+
+    KategoriUpdateInput:
       type: object
       properties:
+        nama_kategori:
+          type: string
+        id_produk:
+          type: integer
+
+    Keranjang:
+      type: object
+      properties:
+        id_keranjang:
+          type: integer
+          example: 1
+        id_pembeli:
+          type: integer
+          example: 1
+        id_produk:
+          type: integer
+          example: 1
+        jumlah:
+          type: integer
+          example: 2
+
+    KeranjangInput:
+      type: object
+      required: [id_pembeli, id_produk, jumlah]
+      properties:
+        id_pembeli:
+          type: integer
+        id_produk:
+          type: integer
+        jumlah:
+          type: integer
+
+    KeranjangUpdateInput:
+      type: object
+      properties:
+        id_pembeli:
+          type: integer
+        id_produk:
+          type: integer
+        jumlah:
+          type: integer
+
+    PesananInduk:
+      type: object
+      properties:
+        id_pesanan_induk:
+          type: integer
+          example: 1
+        id_pembeli:
+          type: integer
+          example: 1
+        kode_pesanan:
+          type: string
+          example: INV-20260101-001
+        tanggal_pesanan:
+          type: string
+          format: date-time
+          example: "2026-01-01T10:00:00Z"
+        status_pesanan_induk:
+          type: string
+          example: DIPROSES
+        alamat_pengiriman:
+          type: string
+          example: Jl. Contoh No. 1
+        nama_penerima:
+          type: string
+          example: Budi
+        no_telepon_penerima:
+          type: string
+          example: "08123456789"
+
+    PesananIndukInput:
+      type: object
+      required:
+        - id_pembeli
+        - kode_pesanan
+        - tanggal_pesanan
+        - status_pesanan_induk
+        - alamat_pengiriman
+        - nama_penerima
+        - no_telepon_penerima
+      properties:
+        id_pembeli:
+          type: integer
+        kode_pesanan:
+          type: string
+        tanggal_pesanan:
+          type: string
+          format: date-time
+        status_pesanan_induk:
+          type: string
+        alamat_pengiriman:
+          type: string
+        nama_penerima:
+          type: string
+        no_telepon_penerima:
+          type: string
+
+    PesananIndukUpdateInput:
+      type: object
+      properties:
+        id_pembeli:
+          type: integer
+        kode_pesanan:
+          type: string
+        tanggal_pesanan:
+          type: string
+          format: date-time
+        status_pesanan_induk:
+          type: string
+        alamat_pengiriman:
+          type: string
+        nama_penerima:
+          type: string
+        no_telepon_penerima:
+          type: string
+
+    PesananUmkm:
+      type: object
+      properties:
+        id_pesanan_umkm:
+          type: integer
+          example: 1
+        id_pesanan_induk:
+          type: integer
+          example: 1
+        id_umkm:
+          type: integer
+          example: 1
+        kode_pesanan_umkm:
+          type: string
+          example: UMKM-20260101-001
+        total_sub_pesanan:
+          type: number
+          format: double
+          example: 30000
+        status_pesanan_umkm:
+          type: string
+          example: DIPROSES
+        metode_pengiriman:
+          type: string
+          enum: [COD, AMBIL_SENDIRI, KURIR_INTERNAL]
+          example: COD
+        status_pengiriman:
+          type: string
+          enum: [MENUNGGU, DIKIRIM, DITERIMA, GAGAL, DIKEMBALIKAN]
+          example: MENUNGGU
+
+    PesananUmkmInput:
+      type: object
+      required:
+        - id_pesanan_induk
+        - id_umkm
+        - kode_pesanan_umkm
+        - total_sub_pesanan
+        - status_pesanan_umkm
+        - metode_pengiriman
+        - status_pengiriman
+      properties:
+        id_pesanan_induk:
+          type: integer
+        id_umkm:
+          type: integer
+        kode_pesanan_umkm:
+          type: string
+        total_sub_pesanan:
+          type: number
+          format: double
+        status_pesanan_umkm:
+          type: string
+        metode_pengiriman:
+          type: string
+          enum: [COD, AMBIL_SENDIRI, KURIR_INTERNAL]
+        status_pengiriman:
+          type: string
+          enum: [MENUNGGU, DIKIRIM, DITERIMA, GAGAL, DIKEMBALIKAN]
+
+    PesananUmkmUpdateInput:
+      type: object
+      properties:
+        id_pesanan_induk:
+          type: integer
+        id_umkm:
+          type: integer
+        kode_pesanan_umkm:
+          type: string
+        total_sub_pesanan:
+          type: number
+          format: double
+        status_pesanan_umkm:
+          type: string
+        metode_pengiriman:
+          type: string
+          enum: [COD, AMBIL_SENDIRI, KURIR_INTERNAL]
+        status_pengiriman:
+          type: string
+          enum: [MENUNGGU, DIKIRIM, DITERIMA, GAGAL, DIKEMBALIKAN]
+
+    ItemPesanan:
+      type: object
+      properties:
+        id_item_pesanan:
+          type: integer
+          example: 1
+        id_pesanan_umkm:
+          type: integer
+          example: 1
+        id_produk:
+          type: integer
+          example: 1
+        nama_produk_saat_dibeli:
+          type: string
+          example: Keripik Pisang
+        harga_asli_saat_dibeli:
+          type: number
+          format: double
+          example: 15000
+        jumlah_pesanan:
+          type: integer
+          example: 2
+        harga_final:
+          type: number
+          format: double
+          example: 15000
+        subtotal:
+          type: number
+          format: double
+          example: 30000
+        status_item:
+          type: string
+          example: DIPROSES
+        catatan_pembeli:
+          type: string
+          example: Pedas
+
+    ItemPesananInput:
+      type: object
+      required:
+        - id_pesanan_umkm
+        - id_produk
+        - nama_produk_saat_dibeli
+        - harga_asli_saat_dibeli
+        - jumlah_pesanan
+        - harga_final
+        - subtotal
+        - status_item
+      properties:
+        id_pesanan_umkm:
+          type: integer
+        id_produk:
+          type: integer
+        nama_produk_saat_dibeli:
+          type: string
+        harga_asli_saat_dibeli:
+          type: number
+          format: double
+        jumlah_pesanan:
+          type: integer
+        harga_final:
+          type: number
+          format: double
+        subtotal:
+          type: number
+          format: double
+        status_item:
+          type: string
+        catatan_pembeli:
+          type: string
+
+    ItemPesananUpdateInput:
+      type: object
+      properties:
+        id_pesanan_umkm:
+          type: integer
+        id_produk:
+          type: integer
+        nama_produk_saat_dibeli:
+          type: string
+        harga_asli_saat_dibeli:
+          type: number
+          format: double
+        jumlah_pesanan:
+          type: integer
+        harga_final:
+          type: number
+          format: double
+        subtotal:
+          type: number
+          format: double
+        status_item:
+          type: string
+        catatan_pembeli:
+          type: string
+
+    PermintaanCustom:
+      type: object
+      properties:
+        id_permintaan_custom:
+          type: integer
+          example: 1
+        id_item_pesanan:
+          type: integer
+          example: 1
+        spesifikasi_custom:
+          type: string
+          example: Tanpa bawang
+        status_custom:
+          type: string
+          example: MENUNGGU
+        harga_custom:
+          type: number
+          format: double
+          nullable: true
+          example: 5000
+        alasan_penolakan:
+          type: string
+          nullable: true
+          example: Tidak bisa
+        id_admin_umkm_respon:
+          type: integer
+          nullable: true
+          example: 1
+        tanggal_permintaan:
+          type: string
+          format: date-time
+          example: "2026-01-01T10:00:00Z"
+        tanggal_respon:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2026-01-01T11:00:00Z"
+
+    PermintaanCustomInput:
+      type: object
+      required: [id_item_pesanan, spesifikasi_custom, status_custom, tanggal_permintaan]
+      properties:
+        id_item_pesanan:
+          type: integer
+        spesifikasi_custom:
+          type: string
+        status_custom:
+          type: string
+        harga_custom:
+          type: number
+          format: double
+          nullable: true
+        alasan_penolakan:
+          type: string
+          nullable: true
+        id_admin_umkm_respon:
+          type: integer
+          nullable: true
+        tanggal_permintaan:
+          type: string
+          format: date-time
+        tanggal_respon:
+          type: string
+          format: date-time
+          nullable: true
+
+    PermintaanCustomUpdateInput:
+      type: object
+      properties:
+        id_item_pesanan:
+          type: integer
+        spesifikasi_custom:
+          type: string
+        status_custom:
+          type: string
+        harga_custom:
+          type: number
+          format: double
+          nullable: true
+        alasan_penolakan:
+          type: string
+          nullable: true
+        id_admin_umkm_respon:
+          type: integer
+          nullable: true
+        tanggal_permintaan:
+          type: string
+          format: date-time
+        tanggal_respon:
+          type: string
+          format: date-time
+          nullable: true
+
+    Pembayaran:
+      type: object
+      properties:
+        id_pembayaran:
+          type: integer
+          example: 1
+        id_pesanan_umkm:
+          type: integer
+          example: 1
+        metode:
+          type: string
+          example: TRANSFER
+        jumlah_bayar:
+          type: number
+          format: double
+          example: 30000
+        status_pembayaran:
+          type: string
+          enum: [PENDING, PAID, COD_LUNAS, GAGAL, EXPIRED, COD_GAGAL]
+          example: PENDING
+        id_super_admin_verifikasi:
+          type: integer
+          nullable: true
+          example: 1
+        tanggal_bayar:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2026-01-01T10:00:00Z"
+
+    PembayaranInput:
+      type: object
+      required: [id_pesanan_umkm, metode, jumlah_bayar, status_pembayaran]
+      properties:
+        id_pesanan_umkm:
+          type: integer
+        metode:
+          type: string
+        jumlah_bayar:
+          type: number
+          format: double
+        status_pembayaran:
+          type: string
+          enum: [PENDING, PAID, COD_LUNAS, GAGAL, EXPIRED, COD_GAGAL]
+        id_super_admin_verifikasi:
+          type: integer
+          nullable: true
+        tanggal_bayar:
+          type: string
+          format: date-time
+          nullable: true
+
+    PembayaranUpdateInput:
+      type: object
+      properties:
+        id_pesanan_umkm:
+          type: integer
+        metode:
+          type: string
+        jumlah_bayar:
+          type: number
+          format: double
+        status_pembayaran:
+          type: string
+          enum: [PENDING, PAID, COD_LUNAS, GAGAL, EXPIRED, COD_GAGAL]
+        id_super_admin_verifikasi:
+          type: integer
+          nullable: true
+        tanggal_bayar:
+          type: string
+          format: date-time
+          nullable: true
+
+    RiwayatStatusPesanan:
+      type: object
+      properties:
+        id_riwayat:
+          type: integer
+          example: 1
+        id_pesanan_umkm:
+          type: integer
+          example: 1
         status:
           type: string
-          example: "success"
-        data:
-          type: array
-          items:
-            $ref: '#/components/schemas/Produk'
+          example: DIPROSES
+        keterangan:
+          type: string
+          example: Pesanan sedang diproses
+        waktu:
+          type: string
+          format: date-time
+          example: "2026-01-01T10:00:00Z"
+
+    RiwayatStatusPesananInput:
+      type: object
+      required: [id_pesanan_umkm, status, waktu]
+      properties:
+        id_pesanan_umkm:
+          type: integer
+        status:
+          type: string
+        keterangan:
+          type: string
+        waktu:
+          type: string
+          format: date-time
+
+    RiwayatStatusPesananUpdateInput:
+      type: object
+      properties:
+        id_pesanan_umkm:
+          type: integer
+        status:
+          type: string
+        keterangan:
+          type: string
+        waktu:
+          type: string
+          format: date-time
 
     DeleteResponse:
       type: object
       properties:
         status:
           type: string
-          example: "success"
+          example: success
         message:
           type: string
-          example: "Produk berhasil dihapus"
+          example: Data berhasil dihapus
 
     ErrorResponse:
       type: object
       properties:
         status:
           type: string
-          example: "error"
+          example: error
         message:
           type: string
-          example: "Produk tidak ditemukan"
+          example: Data tidak ditemukan
