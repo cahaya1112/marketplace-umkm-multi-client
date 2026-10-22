@@ -1,11 +1,12 @@
 <?php
 
+use App\Http\Controllers\DashboardRedirectController;
 use Illuminate\Support\Facades\Route;
 
-Route::view('/', 'welcome')->name('home');
+// Rute ini akan dipanggil otomatis setelah user berhasil login
+Route::get('dashboard', DashboardRedirectController::class)
+    ->middleware(['auth', 'verified'])
+    ->name('dashboard');
 
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::view('dashboard', 'dashboard')->name('dashboard');
-});
-
+// Pertahankan rute settings bawaan dari starter kit Anda
 require __DIR__.'/settings.php';

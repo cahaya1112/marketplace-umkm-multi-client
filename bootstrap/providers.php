@@ -5,12 +5,12 @@ use App\Providers\FortifyServiceProvider;
 
 return [
     App\Providers\AppServiceProvider::class,
-    App\Providers\FortifyServiceProvider::class,
-    App\Modules\Auth\Providers\AuthServiceProvider::class,
-    App\Modules\Umkm\Providers\UmkmServiceProvider::class,
-    App\Modules\Catalog\Providers\CatalogServiceProvider::class,
-    App\Modules\CustomRequest\Providers\CustomRequestServiceProvider::class,
-    App\Modules\Cart\Providers\CartServiceProvider::class,
-    App\Modules\Payment\Providers\PaymentServiceProvider::class,
-    App\Modules\Ordering\Providers\OrderingServiceProvider::class,
+    FortifyServiceProvider::class,
+    // Modul Marketplace
+    App\Modules\Admin\AdminServiceProvider::class,
+    App\Modules\Umkm\UmkmServiceProvider::class,
+    App\Modules\Catalog\CatalogServiceProvider::class,
+    App\Modules\Ordering\OrderingServiceProvider::class,
+    App\Modules\Payments\PaymentsServiceProvider::class,
+    App\Modules\Api\ApiServiceProvider::class,
 ];

@@ -17,7 +17,6 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
 use App\Modules\Umkm\Models\Umkm;
 use Laravel\Sanctum\HasApiTokens;
 
-
 /**
  * @property int $id
  * @property string $name
@@ -30,17 +29,20 @@ use Laravel\Sanctum\HasApiTokens;
  * @property string|null $remember_token
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
+ * @property string $peran
+ * @property string $status
+ * @property string|null $nomor_telepon
  */
 #[Fillable(['name', 'email', 'password'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable implements PasskeyUser
-
 {
-
+    // Menyesuaikan dengan nama tabel tanpa 's'
     protected $table = 'user';
 
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable, HasApiTokens;
+    
     /**
      * Get the attributes that should be cast.
      *
@@ -53,9 +55,6 @@ class User extends Authenticatable implements PasskeyUser
             'password' => 'hashed',
         ];
     }
-
-    // Menyesuaikan dengan nama tabel tanpa 's'
-    
 
     public function initials(): string
     {
@@ -73,20 +72,23 @@ class User extends Authenticatable implements PasskeyUser
     }
 
     // Helper Functions untuk Mengecek Role Pengguna
-    public function isAdmin(): bool
+    public function hasRole(string $role): bool
     {
-        return $this->role === 'admin';
+        return $this->peran === $role && $this->status === 'AKTIF';
     }
 
-    public function isUmkmOwner(): bool
+    public function isSuperAdmin(): bool
     {
-        return $this->role === 'umkm_owner';
+        return $this->hasRole('SUPER_ADMIN');
     }
 
-    public function isCustomer(): bool
+    public function isAdminUmkm(): bool
     {
-        return $this->role === 'customer';
+        return $this->hasRole('ADMIN_UMKM');
     }
 
+    public function isPembeli(): bool
+    {
+        return $this->hasRole('PEMBELI');
+    }
 }
-
