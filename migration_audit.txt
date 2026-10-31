@@ -1,0 +1,773 @@
+﻿
+===== FILE: 0001_01_01_000000_create_user_table.php =====
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('pengguna', function (Blueprint $table) {
+            $table->increments('id_pengguna');
+
+            $table->string('nama', 255);
+            $table->string('email', 255)->unique();
+            $table->string('kata_sandi', 255);
+
+            $table->enum('peran', [
+                'SUPER_ADMIN',
+                'ADMIN_UMKM',
+                'PEMBELI',
+            ]);
+
+            $table->string('nomor_telepon', 255)->nullable();
+
+            // Kolom pendukung autentikasi Laravel.
+            $table->timestamp('email_verified_at')->nullable();
+            $table->rememberToken();
+        });
+
+        Schema::create('password_reset_tokens', function (Blueprint $table) {
+            $table->string('email')->primary();
+            $table->string('token');
+            $table->timestamp('created_at')->nullable();
+        });
+
+        Schema::create('sessions', function (Blueprint $table) {
+            $table->string('id')->primary();
+            $table->unsignedInteger('id_pengguna')->nullable()->index();
+            $table->string('ip_address', 45)->nullable();
+            $table->text('user_agent')->nullable();
+            $table->longText('payload');
+            $table->integer('last_activity')->index();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('sessions');
+        Schema::dropIfExists('password_reset_tokens');
+        Schema::dropIfExists('pengguna');
+    }
+};
+
+===== FILE: 0001_01_01_000001_create_cache_table.php =====
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('cache', function (Blueprint $table) {
+            $table->string('key')->primary();
+            $table->mediumText('value');
+            $table->bigInteger('expiration')->index();
+        });
+
+        Schema::create('cache_locks', function (Blueprint $table) {
+            $table->string('key')->primary();
+            $table->string('owner');
+            $table->bigInteger('expiration')->index();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('cache');
+        Schema::dropIfExists('cache_locks');
+    }
+};
+
+
+===== FILE: 0001_01_01_000002_create_jobs_table.php =====
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('jobs', function (Blueprint $table) {
+            $table->id();
+            $table->string('queue')->index();
+            $table->longText('payload');
+            $table->unsignedSmallInteger('attempts');
+            $table->unsignedInteger('reserved_at')->nullable();
+            $table->unsignedInteger('available_at');
+            $table->unsignedInteger('created_at');
+        });
+
+        Schema::create('job_batches', function (Blueprint $table) {
+            $table->string('id')->primary();
+            $table->string('name');
+            $table->integer('total_jobs');
+            $table->integer('pending_jobs');
+            $table->integer('failed_jobs');
+            $table->longText('failed_job_ids');
+            $table->mediumText('options')->nullable();
+            $table->integer('cancelled_at')->nullable();
+            $table->integer('created_at');
+            $table->integer('finished_at')->nullable();
+        });
+
+        Schema::create('failed_jobs', function (Blueprint $table) {
+            $table->id();
+            $table->string('uuid')->unique();
+            $table->string('connection');
+            $table->string('queue');
+            $table->longText('payload');
+            $table->longText('exception');
+            $table->timestamp('failed_at')->useCurrent();
+
+            $table->index(['connection', 'queue', 'failed_at']);
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('jobs');
+        Schema::dropIfExists('job_batches');
+        Schema::dropIfExists('failed_jobs');
+    }
+};
+
+
+===== FILE: 2026_09_15_082018_create_personal_access_tokens_table.php =====
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('personal_access_tokens', function (Blueprint $table) {
+            $table->id();
+            $table->morphs('tokenable');
+            $table->text('name');
+            $table->string('token', 64)->unique();
+            $table->text('abilities')->nullable();
+            $table->timestamp('last_used_at')->nullable();
+            $table->timestamp('expires_at')->nullable()->index();
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('personal_access_tokens');
+    }
+};
+
+
+===== FILE: 2026_09_17_044104_add_two_factor_columns_to_users_table.php =====
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('pengguna', function (Blueprint $table) {
+            $table->text('two_factor_secret')
+                ->after('kata_sandi')
+                ->nullable();
+
+            $table->text('two_factor_recovery_codes')
+                ->after('two_factor_secret')
+                ->nullable();
+
+            $table->timestamp('two_factor_confirmed_at')
+                ->after('two_factor_recovery_codes')
+                ->nullable();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('pengguna', function (Blueprint $table) {
+            $table->dropColumn([
+                'two_factor_secret',
+                'two_factor_recovery_codes',
+                'two_factor_confirmed_at',
+            ]);
+        });
+    }
+};
+
+
+===== FILE: 2026_09_17_044105_create_passkeys_table.php =====
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('passkeys', function (Blueprint $table) {
+            $table->id();
+
+            $table->unsignedInteger('user_id');
+
+            $table->string('name');
+            $table->string('credential_id')->unique();
+            $table->json('credential');
+            $table->timestamp('last_used_at')->nullable();
+            $table->timestamps();
+
+            $table->foreign('user_id')
+                ->references('id_pengguna')
+                ->on('pengguna')
+                ->cascadeOnDelete();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('passkeys');
+    }
+};
+
+===== FILE: 2026_09_19_121033_create_umkm_table.php =====
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('umkm', function (Blueprint $table) {
+            $table->increments('id_umkm');
+
+            $table->unsignedInteger('id_pengguna')->unique();
+
+            $table->string('nama', 255);
+            $table->text('deskripsi')->nullable();
+            $table->string('alamat', 255)->nullable();
+            $table->string('id_wilayah_asal', 255)->nullable();
+            $table->string('kontak', 255)->nullable();
+            $table->string('gambar_logo', 255)->nullable();
+
+            $table->enum('status', [
+                'AKTIF',
+                'NONAKTIF',
+            ]);
+
+            $table->foreign('id_pengguna')
+                ->references('id_pengguna')
+                ->on('pengguna');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('umkm');
+    }
+};
+
+===== FILE: 2026_09_23_174649_create_permintaan_custom_table.php =====
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('permintaan_custom', function (Blueprint $table) {
+            // Primary key sesuai SQL.
+            $table->increments('id_custom');
+
+            // Kolom relasi sesuai struktur SQL.
+            // Foreign key akan dipasang setelah migration tabel
+            // yang menjadi tujuan relasi tersedia.
+            $table->unsignedInteger('id_pengguna');
+            $table->unsignedInteger('id_produk');
+            $table->unsignedInteger('id_keranjang_item');
+
+            $table->text('spesifikasi');
+            $table->integer('harga_custom')->nullable();
+
+            $table->enum('status_custom', [
+                'PENDING',
+                'DISETUJUI',
+                'DITOLAK',
+            ]);
+
+            $table->text('catatan_umkm')->nullable();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('permintaan_custom');
+    }
+};
+
+
+===== FILE: 2026_10_22_180419_add_peran_dan_status_to_users_table.php.disabled =====
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::table('user', function (Blueprint $table): void {
+            // Hapus kolom role bawaan agar tidak bentrok
+            $table->dropColumn('role');
+            
+            // Tambahkan kolom baru sesuai SRS
+            $table->enum('peran', ['SUPER_ADMIN', 'ADMIN_UMKM', 'PEMBELI'])->default('PEMBELI')->after('password');
+            $table->enum('status', ['AKTIF', 'NONAKTIF'])->default('AKTIF')->after('peran');
+            $table->string('nomor_telepon')->nullable()->after('status');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('user', function (Blueprint $table): void {
+            $table->dropColumn(['peran', 'status', 'nomor_telepon']);
+            $table->enum('role', ['admin', 'umkm_owner', 'customer'])->default('customer');
+        });
+    }
+};
+
+===== FILE: 2026_10_28_121747_create_kategori_table.php =====
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('kategori', function (Blueprint $table) {
+            $table->increments('id_kategori');
+            $table->string('nama', 255);
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('kategori');
+    }
+};
+
+
+===== FILE: 2026_10_28_121820_create_produk_table.php =====
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('produk', function (Blueprint $table) {
+            $table->increments('id_produk');
+
+            $table->unsignedInteger('id_umkm');
+            $table->unsignedInteger('id_kategori');
+
+            $table->string('nama', 255);
+            $table->text('deskripsi')->nullable();
+            $table->integer('harga_retail');
+            $table->integer('berat_gram');
+            $table->string('gambar', 255);
+
+            $table->foreign('id_umkm')
+                ->references('id_umkm')
+                ->on('umkm');
+
+            $table->foreign('id_kategori')
+                ->references('id_kategori')
+                ->on('kategori');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('produk');
+    }
+};
+
+
+===== FILE: 2026_10_28_143920_create_remaining_marketplace_tables.php =====
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        // 1. Alamat pembeli
+        Schema::create('alamat_pembeli', function (Blueprint $table) {
+            $table->increments('id_alamat');
+            $table->unsignedInteger('id_pengguna');
+            $table->string('nama_penerima');
+            $table->string('nomor_telepon');
+            $table->string('alamat_lengkap');
+            $table->string('id_wilayah_tujuan');
+            $table->string('kode_pos');
+
+            $table->foreign('id_pengguna')
+                ->references('id_pengguna')->on('pengguna');
+        });
+
+        // 2. Stok produk
+        Schema::create('stok', function (Blueprint $table) {
+            $table->unsignedInteger('id_produk')->unique();
+            $table->unsignedInteger('id_produk');
+            $table->integer('jumlah_stok');
+            $table->integer('batas_minimum');
+
+            $table->foreign('id_produk')
+                ->references('id_produk')->on('produk');
+        });
+
+        // 3. Keranjang
+        Schema::create('keranjang', function (Blueprint $table) {
+            $table->increments('id_keranjang');
+            $table->unsignedInteger('id_pengguna');
+
+            $table->foreign('id_pengguna')
+                ->references('id_pengguna')->on('pengguna');
+        });
+
+        // 4. Item keranjang
+        Schema::create('keranjang_item', function (Blueprint $table) {
+            $table->increments('id_keranjang_item');
+            $table->unsignedInteger('id_keranjang');
+            $table->unsignedInteger('id_produk');
+            $table->integer('jumlah');
+
+            $table->foreign('id_keranjang')
+                ->references('id_keranjang')->on('keranjang');
+
+            $table->foreign('id_produk')
+                ->references('id_produk')->on('produk');
+        });
+
+        // 5. Pesanan
+        Schema::create('pesanan', function (Blueprint $table) {
+            $table->increments('id_pesanan');
+            $table->unsignedInteger('id_pengguna')->unique();
+            // $table->unsignedInteger('id_pengguna');
+            $table->unsignedInteger('id_alamat');
+            $table->string('kode_pesanan')->unique();
+            $table->dateTime('tanggal_pesanan');
+
+            $table->foreign('id_pengguna')
+                ->references('id_pengguna')->on('pengguna');
+
+            $table->foreign('id_alamat')
+                ->references('id_alamat')->on('alamat_pembeli');
+        });
+
+        // 6. Sub-pesanan
+        Schema::create('sub_pesanan', function (Blueprint $table) {
+            $table->increments('id_sub_pesanan');
+            $table->unsignedInteger('id_pesanan');
+            $table->unsignedInteger('id_umkm');
+
+            $table->enum('status_sub_pesanan', [
+                'MENUNGGU_PEMBAYARAN',
+                'DIPROSES',
+                'DIKIRIM',
+                'SELESAI',
+                'DIBATALKAN',
+            ]);
+
+            $table->string('kurir_kode')->nullable();
+            $table->string('kurir_layanan')->nullable();
+            $table->string('estimasi_pengiriman')->nullable();
+            $table->integer('biaya_pengiriman')->nullable();
+            $table->string('nomor_resi')->nullable();
+            $table->dateTime('dibuat_pada');
+
+            $table->foreign('id_pesanan')
+                ->references('id_pesanan')->on('pesanan');
+
+            $table->foreign('id_umkm')
+                ->references('id_umkm')->on('umkm');
+        });
+
+        // 7. Detail pesanan
+        Schema::create('detail_pesanan', function (Blueprint $table) {
+            $table->increments('id_detail_pesanan');
+            $table->unsignedInteger('id_sub_pesanan');
+            $table->unsignedInteger('id_produk');
+            $table->unsignedInteger('id_custom')->nullable();
+            $table->integer('harga_retail');
+            $table->integer('harga_custom')->nullable();
+            $table->integer('jumlah');
+
+            $table->foreign('id_sub_pesanan')
+                ->references('id_sub_pesanan')->on('sub_pesanan');
+
+            $table->foreign('id_produk')
+                ->references('id_produk')->on('produk');
+        });
+
+        // 8. Pembayaran
+        Schema::create('pembayaran', function (Blueprint $table) {
+            $table->increments('id_pembayaran');
+            $table->unsignedInteger('id_sub_pesanan');
+
+            $table->string('order_id_gateway')->nullable()->unique();
+            $table->string('id_transaksi_gateway')->nullable();
+
+            // Jenis metode disimpan sebagai string karena
+            // nilai enum metode_pembayaran belum ditentukan
+            // dalam spesifikasi SQL yang diberikan.
+            $table->string('metode_pembayaran');
+
+            $table->integer('jumlah_bayar');
+            $table->enum('status_pembayaran', [
+                'PENDING',
+                'PAID',
+                'FAILED',
+                'EXPIRED',
+            ]);
+
+            $table->string('token_pembayaran')->nullable();
+            $table->json('payload_notifikasi')->nullable();
+            $table->dateTime('expired_at')->nullable();
+            $table->dateTime('waktu_bayar')->nullable();
+
+            $table->foreign('id_sub_pesanan')
+                ->references('id_sub_pesanan')->on('sub_pesanan');
+        });
+
+        // 9. Retur
+        Schema::create('retur', function (Blueprint $table) {
+            $table->increments('id_retur');
+            $table->unsignedInteger('id_detail_pesanan');
+            $table->integer('jumlah');
+            $table->text('alasan');
+            $table->string('jenis_retur');
+            $table->string('status_retur');
+            $table->string('bukti_gambar')->nullable();
+            $table->string('kurir_retur')->nullable();
+            $table->string('nomor_resi_retur')->nullable();
+            $table->string('kurir_barang_pengganti')->nullable();
+            $table->string('nomor_resi_barang_pengganti')->nullable();
+            $table->text('catatan_umkm')->nullable();
+            $table->dateTime('waktu_diajukan');
+
+            $table->foreign('id_detail_pesanan')
+                ->references('id_detail_pesanan')->on('detail_pesanan');
+        });
+
+        // 10. Pengembalian dana
+        Schema::create('pengembalian_dana', function (Blueprint $table) {
+            $table->increments('id_pengembalian');
+            $table->unsignedInteger('id_retur');
+            $table->unsignedInteger('id_pembayaran');
+            $table->integer('jumlah_pengembalian');
+            $table->text('alasan');
+            $table->string('id_refund_gateway')->nullable();
+            $table->string('status_pengembalian');
+            $table->json('payload_respons')->nullable();
+            $table->dateTime('waktu_pengembalian');
+
+            $table->foreign('id_retur')
+                ->references('id_retur')->on('retur');
+
+            $table->foreign('id_pembayaran')
+                ->references('id_pembayaran')->on('pembayaran');
+        });
+
+        // 11. Audit log
+        Schema::create('audit_logs', function (Blueprint $table) {
+            $table->bigIncrements('id_audit');
+            $table->unsignedInteger('id_pengguna')->nullable();
+            $table->string('peran')->nullable();
+            $table->unsignedInteger('id_umkm')->nullable();
+            $table->string('aksi');
+            $table->string('nama_entitas');
+            $table->unsignedInteger('id_entitas')->nullable();
+            $table->json('data_sebelum')->nullable();
+            $table->json('data_sesudah')->nullable();
+            $table->string('ip_address')->nullable();
+            $table->dateTime('dibuat_pada');
+
+            $table->foreign('id_pengguna')
+                ->references('id_pengguna')->on('pengguna');
+
+            $table->foreign('id_umkm')
+                ->references('id_umkm')->on('umkm');
+        });
+
+        // Tambahkan foreign key permintaan_custom setelah
+        // produk dan keranjang_item tersedia.
+        Schema::table('permintaan_custom', function (Blueprint $table) {
+            $table->foreign('id_pengguna')
+                ->references('id_pengguna')->on('pengguna');
+
+            $table->foreign('id_produk')
+                ->references('id_produk')->on('produk');
+
+            $table->foreign('id_keranjang_item')
+                ->references('id_keranjang_item')->on('keranjang_item');
+        });
+
+        // Relasi custom pada detail pesanan.
+        Schema::table('detail_pesanan', function (Blueprint $table) {
+            $table->foreign('id_custom')
+                ->references('id_custom')->on('permintaan_custom');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('detail_pesanan', function (Blueprint $table) {
+            $table->dropForeign(['id_custom']);
+        });
+
+        Schema::table('permintaan_custom', function (Blueprint $table) {
+            $table->dropForeign(['id_pengguna']);
+            $table->dropForeign(['id_produk']);
+            $table->dropForeign(['id_keranjang_item']);
+        });
+
+        Schema::dropIfExists('audit_logs');
+        Schema::dropIfExists('pengembalian_dana');
+        Schema::dropIfExists('retur');
+        Schema::dropIfExists('pembayaran');
+        Schema::dropIfExists('detail_pesanan');
+        Schema::dropIfExists('sub_pesanan');
+        Schema::dropIfExists('pesanan');
+        Schema::dropIfExists('keranjang_item');
+        Schema::dropIfExists('keranjang');
+        Schema::dropIfExists('stok');
+        Schema::dropIfExists('alamat_pembeli');
+    }
+};
+
+===== FILE: 2026_10_29_070252_add_unique_constraints_to_stok_and_keranjang_tables.php =====
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('stok_and_keranjang_tables', function (Blueprint $table) {
+            //
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('stok_and_keranjang_tables', function (Blueprint $table) {
+            //
+        });
+    }
+};
+
+
+===== FILE: 2026_10_29_070643_fix_unique_constraints_on_stok_and_keranjang.php =====
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::table('stok', function (Blueprint $table) {
+            $table->unique(
+                'id_produk',
+                'stok_id_produk_unique'
+            );
+        });
+
+        Schema::table('keranjang', function (Blueprint $table) {
+            $table->unique(
+                'id_pengguna',
+                'keranjang_id_pengguna_unique'
+            );
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('keranjang', function (Blueprint $table) {
+            $table->dropUnique('keranjang_id_pengguna_unique');
+        });
+
+        Schema::table('stok', function (Blueprint $table) {
+            $table->dropUnique('stok_id_produk_unique');
+        });
+    }
+};

@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('user', function (Blueprint $table) {
+        Schema::table('pengguna', function (Blueprint $table) {
             $table->text('two_factor_secret')
-                ->after('password')
+                ->after('kata_sandi')
                 ->nullable();
 
             $table->text('two_factor_recovery_codes')
@@ -31,7 +31,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('user', function (Blueprint $table) {
+        Schema::table('pengguna', function (Blueprint $table) {
             $table->dropColumn([
                 'two_factor_secret',
                 'two_factor_recovery_codes',

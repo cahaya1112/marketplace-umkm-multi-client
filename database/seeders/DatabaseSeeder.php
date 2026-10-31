@@ -19,9 +19,9 @@ class DatabaseSeeder extends Seeder
         User::updateOrCreate(
             ['email' => 'admin@marketplace.com'],
             [
-                'name'     => 'Admin Marketplace',
-                'password' => bcrypt('password123'),
-                'role'     => 'admin',
+                'nama' => 'Admin Marketplace',
+                'kata_sandi' => 'password123',
+                'peran' => 'SUPER_ADMIN',
             ]
         );
 
@@ -29,9 +29,9 @@ class DatabaseSeeder extends Seeder
         User::updateOrCreate(
             ['email' => 'penjual@marketplace.com'],
             [
-                'name'     => 'Pemilik UMKM',
-                'password' => bcrypt('password123'),
-                'role'     => 'umkm_owner', // <--- Disesuaikan ke 'umkm_owner'
+                'nama' => 'Pemilik UMKM',
+                'kata_sandi' => 'password123',
+                'peran' => 'ADMIN_UMKM',
             ]
         );
 
@@ -39,9 +39,9 @@ class DatabaseSeeder extends Seeder
         User::updateOrCreate(
             ['email' => 'customer@marketplace.com'],
             [
-                'name'     => 'Customer Pembeli',
-                'password' => bcrypt('password123'),
-                'role'     => 'customer',
+                'nama' => 'Customer Pembeli',
+                'kata_sandi' => 'password123',
+                'peran' => 'PEMBELI',
             ]
         );
     }

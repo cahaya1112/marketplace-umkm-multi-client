@@ -10,20 +10,32 @@ class DashboardRedirectController extends Controller
     {
         $user = $request->user();
 
-        // 1. Super Admin dialihkan ke Dashboard Platform
+        // Super Admin menuju dashboard platform.
         if ($user->isSuperAdmin()) {
             return redirect()->route('admin.dashboard');
         }
 
-        // 2. Admin UMKM dialihkan ke Dashboard Toko UMKM miliknya
+        // Admin UMKM menuju dashboard UMKM miliknya.
         if ($user->isAdminUmkm()) {
-            // Placeholder ID toko. Pada implementasi selanjutnya, 
-            // ini akan diambil dari relasi tabel UMKM ($user->umkm->id_umkm)
-            $umkmId = 'toko-dummy';
-            return redirect()->route('umkm.dashboard', ['umkm' => $umkmId]);
+            $umkm = $user->umkm;
+
+            if (!$umkm) {
+                return redirect()
+                    ->route('pembeli.home')
+                    ->with('status', 'Akun kamu belum memiliki UMKM.');
+            }
+
+            return redirect()->route('umkm.dashboard', [
+                'umkm' => $umkm->id_umkm,
+            ]);
         }
 
-        // 3. Pembeli dialihkan ke halaman utama Marketplace
-        return redirect()->route('pembeli.home');
+        // Pembeli menuju halaman utama marketplace.
+        if ($user->isPembeli()) {
+            return redirect()->route('pembeli.home');
+        }
+
+        // Pengguna dengan peran yang tidak dikenali.
+        abort(403, 'Peran pengguna tidak dikenali.');
     }
 }

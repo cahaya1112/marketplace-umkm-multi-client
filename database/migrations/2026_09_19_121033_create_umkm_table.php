@@ -8,24 +8,31 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // UBAH 'user' MENJADI 'umkm'
         Schema::create('umkm', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained('user')->onDelete('cascade');
-            $table->string('name');
-            $table->string('slug')->unique();
-            $table->text('description')->nullable();
-            $table->string('logo_path')->nullable();
-            $table->string('address')->nullable();
-            $table->string('phone_number')->nullable();
-            $table->boolean('is_verified')->default(false);
-            $table->timestamps();
+            $table->increments('id_umkm');
+
+            $table->unsignedInteger('id_pengguna')->unique();
+
+            $table->string('nama', 255);
+            $table->text('deskripsi')->nullable();
+            $table->string('alamat', 255)->nullable();
+            $table->string('id_wilayah_asal', 255)->nullable();
+            $table->string('kontak', 255)->nullable();
+            $table->string('gambar_logo', 255)->nullable();
+
+            $table->enum('status', [
+                'AKTIF',
+                'NONAKTIF',
+            ]);
+
+            $table->foreign('id_pengguna')
+                ->references('id_pengguna')
+                ->on('pengguna');
         });
     }
 
     public function down(): void
     {
-        // UBAH 'user' MENJADI 'umkm'
         Schema::dropIfExists('umkm');
     }
 };

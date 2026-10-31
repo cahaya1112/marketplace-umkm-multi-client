@@ -9,20 +9,26 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('permintaan_custom', function (Blueprint $table) {
-            $table->id('id_permintaan_custom');
+            // Primary key sesuai SQL.
+            $table->increments('id_custom');
 
-            $table->unsignedBigInteger('id_item_pesanan')->unique();
-            $table->text('spesifikasi_custom');
-            $table->string('status_custom')->default('MENUNGGU');
-            $table->decimal('harga_custom', 15, 2)->nullable();
-            $table->text('alasan_penolakan')->nullable();
-            $table->unsignedBigInteger('id_admin_umkm_respon')->nullable();
+            // Kolom relasi sesuai struktur SQL.
+            // Foreign key akan dipasang setelah migration tabel
+            // yang menjadi tujuan relasi tersedia.
+            $table->unsignedInteger('id_pengguna');
+            $table->unsignedInteger('id_produk');
+            $table->unsignedInteger('id_keranjang_item');
 
-            $table->timestamp('tanggal_permintaan');
-            $table->timestamp('tanggal_respon')->nullable();
+            $table->text('spesifikasi');
+            $table->integer('harga_custom')->nullable();
 
-            $table->index('id_item_pesanan');
-            $table->index('id_admin_umkm_respon');
+            $table->enum('status_custom', [
+                'PENDING',
+                'DISETUJUI',
+                'DITOLAK',
+            ]);
+
+            $table->text('catatan_umkm')->nullable();
         });
     }
 

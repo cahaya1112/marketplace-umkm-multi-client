@@ -8,15 +8,24 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('user', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('email')->unique();
+        Schema::create('pengguna', function (Blueprint $table) {
+            $table->increments('id_pengguna');
+
+            $table->string('nama', 255);
+            $table->string('email', 255)->unique();
+            $table->string('kata_sandi', 255);
+
+            $table->enum('peran', [
+                'SUPER_ADMIN',
+                'ADMIN_UMKM',
+                'PEMBELI',
+            ]);
+
+            $table->string('nomor_telepon', 255)->nullable();
+
+            // Kolom pendukung autentikasi Laravel.
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
-            $table->enum('role', ['admin', 'umkm_owner', 'customer'])->default('customer');
             $table->rememberToken();
-            $table->timestamps();
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
@@ -27,7 +36,7 @@ return new class extends Migration
 
         Schema::create('sessions', function (Blueprint $table) {
             $table->string('id')->primary();
-            $table->foreignId('user_id')->nullable()->index();
+            $table->unsignedInteger('id_pengguna')->nullable()->index();
             $table->string('ip_address', 45)->nullable();
             $table->text('user_agent')->nullable();
             $table->longText('payload');
@@ -37,8 +46,8 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('user');
-        Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');
+        Schema::dropIfExists('password_reset_tokens');
+        Schema::dropIfExists('pengguna');
     }
 };
