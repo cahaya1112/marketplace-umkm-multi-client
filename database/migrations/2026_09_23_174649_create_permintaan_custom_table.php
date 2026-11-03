@@ -17,7 +17,7 @@ return new class extends Migration
             // yang menjadi tujuan relasi tersedia.
             $table->unsignedInteger('id_pengguna');
             $table->unsignedInteger('id_produk');
-            $table->unsignedInteger('id_keranjang_item');
+            $table->unsignedInteger('id_keranjang_item')->nullable();
 
             $table->text('spesifikasi');
             $table->integer('harga_custom')->nullable();

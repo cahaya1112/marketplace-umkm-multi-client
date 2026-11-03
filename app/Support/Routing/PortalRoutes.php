@@ -16,7 +16,7 @@ final class PortalRoutes
 
     public static function umkm(Closure|string $routes): void
     {
-        Route::middleware(['web', 'auth', 'role:ADMIN_UMKM'])
+        Route::middleware(['web', 'auth', 'role:ADMIN_UMKM', 'umkm.access'])
             ->prefix('umkm/{umkm}')
             ->name('umkm.')
             ->group($routes);

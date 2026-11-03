@@ -125,10 +125,10 @@ class UserAndUmkmTest extends TestCase
 
     /**
      * Pengujian 4:
-     * Memastikan DatabaseSeeder membuat tiga pengguna
-     * dengan peran yang sesuai.
+     * Memastikan DatabaseSeeder membuat empat pengguna
+     * dengan peran yang sesuai, dan dua UMKM milik dua Admin UMKM.
      */
-    public function test_database_seeder_membuat_tiga_pengguna_dengan_peran_yang_benar(): void
+    public function test_database_seeder_membuat_pengguna_dan_umkm_dengan_peran_yang_benar(): void
     {
         $this->seed(\Database\Seeders\DatabaseSeeder::class);
 
@@ -147,6 +147,12 @@ class UserAndUmkmTest extends TestCase
             'peran' => 'PEMBELI',
         ]);
 
-        $this->assertDatabaseCount('pengguna', 3);
+        $this->assertDatabaseHas('pengguna', [
+            'email' => 'penjual2@marketplace.com',
+            'peran' => 'ADMIN_UMKM',
+        ]);
+
+        $this->assertDatabaseCount('pengguna', 4);
+        $this->assertDatabaseCount('umkm', 2);
     }
 }
