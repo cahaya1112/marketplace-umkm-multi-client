@@ -1,69 +1,27 @@
-<x-layouts::auth :title="__('Register')">
-    <div class="flex flex-col gap-6">
-        <x-auth-header :title="__('Create an account')" :description="__('Enter your details below to create your account')" />
+@extends('layouts.masuk')
+@section('title', 'Registrasi Pembeli | GintanganCraft')
+@section('caption_title', 'Bergabung Bersama Pengrajin Lokal')
+@section('caption_text', 'Buat akun pembeli untuk menjelajahi produk anyaman bambu, rotan, dan furnitur handmade dari UMKM terpercaya.')
 
-        <!-- Session Status -->
-        <x-auth-session-status class="text-center" :status="session('status')" />
+@section('form')
+<h1 class="font-serif text-2xl font-semibold">Registrasi Pembeli</h1>
+<p class="mt-1 text-sm text-slate2">Buat akun baru untuk mulai berbelanja.</p>
 
-        <form method="POST" action="{{ route('register.store') }}" class="flex flex-col gap-6">
-            @csrf
-            <!-- Name -->
-            <flux:input
-                name="name"
-                :label="__('Name')"
-                :value="old('name')"
-                type="text"
-                required
-                autofocus
-                autocomplete="name"
-                :placeholder="__('Full name')"
-            />
+<form method="POST" action="{{ route('register.store') }}" class="mt-8 space-y-4">
+@csrf
+<x-gi-field name="name" label="Nama Lengkap" icon="user" placeholder="Masukkan nama lengkap" autocomplete="name" :autofocus="true" />
+<x-gi-field name="email" label="Email" icon="mail" type="email" placeholder="Masukkan email anda" autocomplete="email" />
+<x-gi-field name="nomor_telepon" label="Nomor Telepon (opsional)" icon="phone" type="tel" placeholder="Contoh: 081234567890" autocomplete="tel" :required="false" />
+<x-gi-field name="password" label="Password" icon="lock" type="password" placeholder="Minimal 8 karakter" autocomplete="new-password" :toggle="true" />
+<x-gi-field name="password_confirmation" label="Konfirmasi Password" icon="lock" type="password" placeholder="Ulangi password" autocomplete="new-password" :toggle="true" />
 
-            <!-- Email Address -->
-            <flux:input
-                name="email"
-                :label="__('Email address')"
-                :value="old('email')"
-                type="email"
-                required
-                autocomplete="email"
-                placeholder="email@example.com"
-            />
+<button type="submit" class="mt-2 flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-forest text-sm font-medium text-white transition hover:bg-forestdark" data-test="register-user-button">
+Daftar <x-gi name="arrow" class="h-4 w-4" />
+</button>
+</form>
 
-            <!-- Password -->
-            <flux:input
-                name="password"
-                :label="__('Password')"
-                type="password"
-                required
-                autocomplete="new-password"
-                :placeholder="__('Password')"
-                passwordrules="{{ \Illuminate\Validation\Rules\Password::defaults()->toPasswordRulesString() }}"
-                viewable
-            />
-
-            <!-- Confirm Password -->
-            <flux:input
-                name="password_confirmation"
-                :label="__('Confirm password')"
-                type="password"
-                required
-                autocomplete="new-password"
-                :placeholder="__('Confirm password')"
-                passwordrules="{{ \Illuminate\Validation\Rules\Password::defaults()->toPasswordRulesString() }}"
-                viewable
-            />
-
-            <div class="flex items-center justify-end">
-                <flux:button type="submit" variant="primary" class="w-full" data-test="register-user-button">
-                    {{ __('Create account') }}
-                </flux:button>
-            </div>
-        </form>
-
-        <div class="space-x-1 rtl:space-x-reverse text-center text-sm text-zinc-600 dark:text-zinc-400">
-            <span>{{ __('Already have an account?') }}</span>
-            <flux:link :href="route('login')" wire:navigate>{{ __('Log in') }}</flux:link>
-        </div>
-    </div>
-</x-layouts::auth>
+<p class="mt-6 text-center text-sm text-slate2">
+Sudah punya akun?
+<a href="{{ route('login') }}" class="font-semibold text-forest hover:underline">Login</a>
+</p>
+@endsection

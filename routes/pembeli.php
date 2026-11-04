@@ -1,6 +1,6 @@
 <?php
+
+use App\Http\Controllers\KatalogPublikController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return 'Halaman Katalog Publik Pembeli';
-})->name('home');
+Route::get('/', KatalogPublikController::class)->name('home');

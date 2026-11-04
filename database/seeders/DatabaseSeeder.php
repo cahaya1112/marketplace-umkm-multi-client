@@ -77,5 +77,7 @@ class DatabaseSeeder extends Seeder
                 'peran' => 'PEMBELI',
             ]
         );
+        
+        $this->call(KatalogSeeder::class);
     }
 }

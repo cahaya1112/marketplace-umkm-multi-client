@@ -21,12 +21,16 @@ class CreateNewUser implements CreatesNewUsers
     {
         Validator::make($input, [
             ...$this->profileRules(),
+            'nomor_telepon' => ['nullable', 'regex:/^(\+62|62|0)8[0-9]{8,12}$/'],
             'password' => $this->passwordRules(),
+        ], [
+            'nomor_telepon.regex' => 'Nomor telepon tidak valid. Contoh: 081234567890.',
         ])->validate();
 
         return User::create([
             'nama' => $input['name'],
             'email' => $input['email'],
+            'nomor_telepon' => $input['nomor_telepon'] ?? null,
             'kata_sandi' => $input['password'],
             'peran' => 'PEMBELI',
         ]);
