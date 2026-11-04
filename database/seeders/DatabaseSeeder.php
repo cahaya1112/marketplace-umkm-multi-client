@@ -79,5 +79,6 @@ class DatabaseSeeder extends Seeder
         );
         
         $this->call(KatalogSeeder::class);
+        $this->call(TransaksiSeeder::class);
     }
 }

@@ -2,12 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Support\UrlGambar;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class KatalogPublikController extends Controller
 {
-    public function __invoke()
+    public function __invoke(Request $request)
     {
+        $q = trim((string) $request->query('q', ''));
+
         $umkmAktif = fn () => DB::table('umkm')->where('status', 'AKTIF');
 
         $produkAktif = fn () => DB::table('produk')
@@ -26,12 +30,16 @@ class KatalogPublikController extends Controller
             ->limit(6)
             ->get(['id_kategori', 'nama']);
 
-        $produk = $produkAktif()
-            ->orderByDesc('produk.id_produk')
+        $produkQuery = $produkAktif()->orderByDesc('produk.id_produk');
+        if ($q !== '') {
+            $produkQuery->where('produk.nama', 'like', '%'.$q.'%');
+        }
+
+        $produk = $produkQuery
             ->limit(8)
             ->get(['produk.id_produk', 'produk.nama', 'produk.harga_retail', 'produk.gambar'])
             ->map(function ($p) {
-                $p->gambar = $this->urlGambar($p->gambar);
+                $p->gambar = UrlGambar::dari($p->gambar);
 
                 return $p;
             });
@@ -41,25 +49,31 @@ class KatalogPublikController extends Controller
             ->limit(3)
             ->get(['id_umkm', 'nama', 'deskripsi', 'alamat', 'gambar_logo'])
             ->map(function ($u) {
-                $u->gambar_logo = $this->urlGambar($u->gambar_logo);
+                $u->gambar_logo = UrlGambar::dari($u->gambar_logo);
 
                 return $u;
             });
 
-        return view('pembeli.beranda', compact('stats', 'kategori', 'produk', 'umkm'));
-    }
+        $data = compact('stats', 'kategori', 'produk', 'umkm', 'q');
 
-    // Path gambar di database diubah jadi URL. File disimpan di storage/app/public (butuh: php artisan storage:link).
-    private function urlGambar(?string $path): ?string
-    {
-        if (blank($path)) {
-            return null;
+        // Pembeli yang sudah login melihat beranda versi pelanggan (gambar 1).
+        $user = $request->user();
+        if ($user && $user->isPembeli()) {
+            $data['jumlahKeranjang'] = (int) DB::table('keranjang_item')
+                ->join('keranjang', 'keranjang.id_keranjang', '=', 'keranjang_item.id_keranjang')
+                ->where('keranjang.id_pengguna', $user->id_pengguna)
+                ->sum('keranjang_item.jumlah');
+
+            // Pesanan yang menunggu pembayaran atau sedang dikirim.
+            $data['jumlahNotifikasi'] = DB::table('sub_pesanan')
+                ->join('pesanan', 'pesanan.id_pesanan', '=', 'sub_pesanan.id_pesanan')
+                ->where('pesanan.id_pengguna', $user->id_pengguna)
+                ->whereIn('sub_pesanan.status_sub_pesanan', ['MENUNGGU_PEMBAYARAN', 'DIKIRIM'])
+                ->count();
+
+            return view('pembeli.beranda-login', $data);
         }
 
-        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
-            return $path;
-        }
-
-        return asset('storage/'.ltrim($path, '/'));
+        return view('pembeli.beranda', $data);
     }
 }

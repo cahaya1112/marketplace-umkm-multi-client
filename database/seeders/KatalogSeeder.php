@@ -49,7 +49,7 @@ class KatalogSeeder extends Seeder
 
             DB::table('stok')->updateOrInsert(
                 ['id_produk' => $idProduk],
-                ['jumlah_stok' => 25, 'batas_minimum' => 5]
+                ['jumlah_stok' => $nama === 'Keranjang Buah' ? 0 : 25, 'batas_minimum' => 5]
             );
         }
     }

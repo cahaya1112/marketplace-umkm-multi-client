@@ -1,6 +1,6 @@
 <?php
+
+use App\Http\Controllers\AdminDashboardController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/dashboard', function () {
-    return 'Dashboard Super Admin';
-})->name('dashboard');
+Route::get('/dashboard', AdminDashboardController::class)->name('dashboard');
