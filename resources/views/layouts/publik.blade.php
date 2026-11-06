@@ -27,7 +27,7 @@ colors: { forest: '#3E5D3C', forestdark: '#2F4A2E', cream: '#F9ECCD', sand: '#E3
 </a>
 
 <nav class="hidden items-center gap-6 text-xs md:flex">
-<a href="#katalog" class="flex items-center gap-1.5 hover:text-forest"><x-gi name="box" class="h-3.5 w-3.5" />Katalog</a>
+<a href="/katalog" class="flex items-center gap-1.5 hover:text-forest"><x-gi name="box" class="h-3.5 w-3.5" />Katalog</a>
 <a href="#umkm" class="flex items-center gap-1.5 hover:text-forest"><x-gi name="store" class="h-3.5 w-3.5" />UMKM</a>
 <a href="#kategori" class="flex items-center gap-1.5 hover:text-forest"><x-gi name="tag" class="h-3.5 w-3.5" />Kategori</a>
 <a href="#bantuan" class="flex items-center gap-1.5 hover:text-forest"><x-gi name="help" class="h-3.5 w-3.5" />Bantuan</a>

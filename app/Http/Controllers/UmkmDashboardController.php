@@ -112,11 +112,11 @@ class UmkmDashboardController extends Controller
         // ---- Menu sidebar (selain Dashboard masih '#', halamannya belum dibuat) ----
         $menu = [
             ['label' => 'Dashboard', 'icon' => 'grid', 'href' => route('umkm.dashboard', ['umkm' => $id]), 'active' => true],
-            ['label' => 'UMKM Saya', 'icon' => 'store', 'href' => '#'],
-            ['label' => 'Produk', 'icon' => 'box', 'href' => '#'],
-            ['label' => 'Stok', 'icon' => 'layers', 'href' => '#'],
+            ['label' => 'UMKM Saya', 'icon' => 'store', 'href' => route('kelola.toko.edit')],
+            ['label' => 'Produk', 'icon' => 'box', 'href' => route('kelola.produk.index')],
+            ['label' => 'Stok', 'icon' => 'layers', 'href' => route('kelola.stok.index')],
             ['label' => 'Pesanan', 'icon' => 'cart', 'href' => '#'],
-            ['label' => 'Permintaan Custom', 'icon' => 'filepen', 'href' => '#'],
+            ['label' => 'Permintaan Custom', 'icon' => 'filepen', 'href' => route('kelola.custom.index')],
             ['label' => 'Metode Pengiriman', 'icon' => 'truck', 'href' => '#'],
             ['label' => 'Retur', 'icon' => 'undo', 'href' => '#'],
             ['label' => 'Pengembalian Dana', 'icon' => 'dollar', 'href' => '#'],
