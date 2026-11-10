@@ -24,8 +24,8 @@ $nav = [
 ['Katalog', 'box', '#katalog', false],
 ['UMKM', 'store', '#umkm', false],
 ['Kategori', 'tag', '#kategori', false],
-['Keranjang', 'cart', '#', false],
-['Pesanan', 'box', '#', false],
+['Keranjang', 'cart', route('keranjang.index'), false],
+['Custom Saya', 'box', route('custom.saya'), false],
 ['Profil', 'user', '#', false],
 ];
 @endphp
