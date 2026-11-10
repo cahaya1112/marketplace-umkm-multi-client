@@ -42,6 +42,15 @@
                 @if ($c->status_custom === 'PENDING')
                     <form method="POST" class="mt-4 space-y-3">
                         @csrf
+                        <input
+                            type="number"
+                            name="harga_custom"
+                            min="1"
+                            step="1"
+                            required
+                            placeholder="Masukkan harga custom (Rp)"
+                            class="w-full rounded-xl border border-[#D2A874]/60 px-4 py-2 text-sm"
+                        >
                         <textarea name="catatan_umkm" rows="2" placeholder="Catatan untuk pembeli (opsional)"
                                   class="w-full rounded-xl border border-[#D2A874]/60 px-4 py-2 text-sm"></textarea>
                         <div class="flex gap-3">
