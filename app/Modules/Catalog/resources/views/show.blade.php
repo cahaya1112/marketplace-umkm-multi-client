@@ -87,10 +87,58 @@
                             title="{{ $jumlahStok > 0 ? 'Fitur checkout belum tersedia' : 'Stok habis' }}">Beli Sekarang</button>
                 @endif
 
-                <button type="button" id="btn-custom" class="rounded-xl bg-[#c9a26c] px-6 py-3 font-semibold text-slate-900 hover:opacity-90">Ajukan Custom</button>
+                <button type="button" onclick="document.getElementById('form-custom').classList.toggle('hidden')" class="rounded-xl bg-[#c9a26c] px-6 py-3 font-semibold text-slate-900 hover:opacity-90"> Ajukan Custom
+                </button>
             </div>
         </div>
     </div>
+
+    {{-- Form pengajuan custom --}}
+<div id="form-custom" class="mt-6 hidden rounded-2xl border border-[#e2d9bd] bg-white p-6 shadow-sm">
+    <h2 class="text-xl font-bold text-slate-900">Ajukan Custom Pesanan</h2>
+
+    <p class="mt-2 text-sm text-slate-600">
+        Produk: {{ $produk->nama }}
+    </p>
+
+    <p class="mt-1 text-sm text-slate-600">
+        Tuliskan detail ukuran, warna, motif, bahan, dan kebutuhan custom lainnya.
+        UMKM akan meninjau permintaan dan menentukan harga.
+    </p>
+
+    <form method="POST" action="{{ route('custom.store', $produk->id_produk) }}" class="mt-4 space-y-4">
+        @csrf
+
+        <textarea
+            name="spesifikasi"
+            rows="5"
+            required
+            minlength="10"
+            maxlength="3000"
+            placeholder="Contoh: Saya ingin lampu rotan ukuran 40 cm, warna natural, dengan motif minimalis..."
+            class="w-full rounded-xl border border-[#e2d9bd] px-4 py-3 text-sm focus:border-[#3d5a3d] focus:outline-none"
+        >{{ old('spesifikasi') }}</textarea>
+
+        @error('spesifikasi')
+            <p class="text-sm text-red-600">{{ $message }}</p>
+        @enderror
+
+        <div class="flex flex-wrap gap-3">
+            <button
+                type="submit"
+                class="rounded-xl bg-[#3d5a3d] px-6 py-3 font-semibold text-white hover:opacity-90">
+                Kirim Permintaan
+            </button>
+
+            <button
+                type="button"
+                onclick="document.getElementById('form-custom').classList.add('hidden')"
+                class="rounded-xl border border-slate-300 px-6 py-3 font-semibold text-slate-600">
+                Batal
+            </button>
+        </div>
+    </form>
+</div>
 
     {{-- Kartu toko --}}
     <div class="mt-12 flex flex-col gap-4 rounded-2xl border border-[#e2d9bd] bg-white p-6 shadow-sm sm:flex-row sm:items-center">
@@ -109,10 +157,6 @@
 </div>
 
 {{-- Notifikasi (toast) --}}
-<div id="toast" class="fixed bottom-6 right-6 z-50 hidden w-80 rounded-2xl border border-[#e2d9bd] bg-[#f8ecd0] p-5 shadow-lg">
-    <p class="font-semibold text-slate-900">Pilih produk di keranjang</p>
-    <p class="mt-1 text-slate-600">Ajukan custom dari halaman keranjang.</p>
-</div>
 
 <script>
     (function () {
