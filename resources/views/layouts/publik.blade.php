@@ -26,12 +26,53 @@ colors: { forest: '#3E5D3C', forestdark: '#2F4A2E', cream: '#F9ECCD', sand: '#E3
 <span class="text-sm font-semibold">Marketplace UMKM</span>
 </a>
 
-<nav class="hidden items-center gap-6 text-xs md:flex">
+{{-- <nav class="hidden items-center gap-6 text-xs md:flex">
 <a href="/katalog" class="flex items-center gap-1.5 hover:text-forest"><x-gi name="box" class="h-3.5 w-3.5" />Katalog</a>
 <a href="#umkm" class="flex items-center gap-1.5 hover:text-forest"><x-gi name="store" class="h-3.5 w-3.5" />UMKM</a>
 <a href="#kategori" class="flex items-center gap-1.5 hover:text-forest"><x-gi name="tag" class="h-3.5 w-3.5" />Kategori</a>
 <a href="#bantuan" class="flex items-center gap-1.5 hover:text-forest"><x-gi name="help" class="h-3.5 w-3.5" />Bantuan</a>
+</nav> --}}
+
+
+<nav class="hidden items-center gap-6 text-xs md:flex">
+    <a href="/katalog" class="flex items-center gap-1.5 hover:text-forest">
+        <x-gi name="box" class="h-3.5 w-3.5" />Katalog
+    </a>
+
+    <a href="#umkm" class="flex items-center gap-1.5 hover:text-forest">
+        <x-gi name="store" class="h-3.5 w-3.5" />UMKM
+    </a>
+
+    <a href="#kategori" class="flex items-center gap-1.5 hover:text-forest">
+        <x-gi name="tag" class="h-3.5 w-3.5" />Kategori
+    </a>
+
+    @if (auth()->check() && auth()->user()->peran === 'PEMBELI')
+        @php
+            $jumlahKeranjang = \App\Modules\Ordering\Models\KeranjangItem::whereHas(
+                'keranjang',
+                fn ($query) => $query->where('id_pengguna', auth()->id())
+            )->sum('jumlah');
+        @endphp
+
+        <a href="{{ route('keranjang.index') }}"
+           class="relative flex items-center gap-1.5 hover:text-forest">
+            <x-gi name="shopping-cart" class="h-3.5 w-3.5" />
+            Keranjang
+
+            @if ($jumlahKeranjang > 0)
+                <span class="absolute -right-3 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-bold text-white">
+                    {{ $jumlahKeranjang }}
+                </span>
+            @endif
+        </a>
+    @endif
+
+    <a href="#bantuan" class="flex items-center gap-1.5 hover:text-forest">
+        <x-gi name="help" class="h-3.5 w-3.5" />Bantuan
+    </a>
 </nav>
+
 
 <div class="flex items-center gap-3 text-xs">
 @auth
