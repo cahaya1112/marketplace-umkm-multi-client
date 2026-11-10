@@ -4,6 +4,23 @@
 
 @section('content')
    <div class="mx-auto max-w-6xl px-4 py-12">
+
+    {{-- Notifikasi berhasil --}}
+    @if (session('success'))
+        <div class="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm font-medium text-emerald-800">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    {{-- Notifikasi gagal --}}
+    @if ($errors->any())
+        <div class="mb-6 rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700">
+            @foreach ($errors->all() as $error)
+                <p>{{ $error }}</p>
+            @endforeach
+        </div>
+    @endif
+
     <h1 class="text-4xl font-bold text-slate-900">Katalog Produk</h1>
     <p class="mt-3 text-lg text-slate-600">Temukan produk kerajinan UMKM lokal</p>
 
