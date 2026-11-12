@@ -1,5 +1,5 @@
 
-@extends('layouts.publik')
+@extends('layouts.pelanggan')
 
 @section('title', 'Keranjang Belanja')
 
