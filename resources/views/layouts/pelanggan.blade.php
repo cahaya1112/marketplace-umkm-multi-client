@@ -20,8 +20,8 @@ colors: { forest: '#3E5D3C', forestdark: '#2F4A2E', cream: '#F9ECCD', sand: '#E3
 <body class="bg-cream font-sans text-ink antialiased">
 @php
 $nav = [
-['Home', 'home', route('pembeli.home'), true],
-['Katalog', 'box', '#katalog', false],
+   ['Home', 'home', route('pembeli.home'), request()->routeIs('pembeli.home')],
+['Katalog', 'box', route('katalog.index'), request()->routeIs('katalog.*', 'produk.*')],
 ['UMKM', 'store', '#umkm', false],
 ['Kategori', 'tag', '#kategori', false],
 ['Keranjang', 'cart', route('keranjang.index'), false],

@@ -1,20 +1,32 @@
-   @extends('layouts.publik')
+@php
+    $induk = (auth()->check() && auth()->user()->isPembeli()) ? 'layouts.pelanggan' : 'layouts.publik';
+@endphp
+@extends($induk)
 
 @section('title', $produk->nama)
 
 @section('content')
 @php
-    $jumlahStok = $produk->stok->jumlah_stok ?? 0;
+    $jumlahStok = $produk->stok ? $produk->stok->jumlah_stok : 0;
     $umkm = $produk->umkm;
     $logoUmkm = $umkm->gambar_logo
         ? (\Illuminate\Support\Str::startsWith($umkm->gambar_logo, ['http://', 'https://']) ? $umkm->gambar_logo : asset('storage/' . $umkm->gambar_logo))
         : null;
+    $pengguna = auth()->user();
+    $bolehCustom = $pengguna && $pengguna->isPembeli() && Route::has('custom.store');
 @endphp
 
-   <div class="mx-auto max-w-6xl px-4 py-10">
+<div class="mx-auto max-w-6xl px-4 py-10">
     <a href="{{ route('katalog.index') }}" class="inline-flex items-center gap-2 text-slate-600 hover:text-slate-900">
         <span>←</span> Kembali ke Katalog
     </a>
+
+    @if (session('success'))
+        <div class="mt-4 rounded-xl bg-emerald-100 px-4 py-3 text-sm text-emerald-800">{{ session('success') }}</div>
+    @endif
+    @if (session('galat'))
+        <div class="mt-4 rounded-xl bg-red-100 px-4 py-3 text-sm text-red-700">{{ session('galat') }}</div>
+    @endif
 
     <div class="mt-6 grid gap-10 lg:grid-cols-2">
         {{-- Gambar produk --}}
@@ -62,8 +74,7 @@
                 </div>
             </div>
 
-            {{-- Tombol aksi. keranjang.tambah dan checkout.langsung dibuat oleh modul
-                 Keranjang/Checkout (Anggota 3); selama belum ada, tombolnya nonaktif. --}}
+            {{-- Tombol aksi --}}
             <div class="mt-5 flex flex-wrap gap-3">
                 @if ($jumlahStok > 0 && Route::has('keranjang.tambah'))
                     <form method="POST" action="{{ route('keranjang.tambah', $produk->id_produk) }}">
@@ -87,58 +98,17 @@
                             title="{{ $jumlahStok > 0 ? 'Fitur checkout belum tersedia' : 'Stok habis' }}">Beli Sekarang</button>
                 @endif
 
-                <button type="button" onclick="document.getElementById('form-custom').classList.toggle('hidden')" class="rounded-xl bg-[#c9a26c] px-6 py-3 font-semibold text-slate-900 hover:opacity-90"> Ajukan Custom
-                </button>
+                @if ($bolehCustom)
+                    <button type="button" id="btn-custom" class="rounded-xl bg-[#c9a26c] px-6 py-3 font-semibold text-slate-900 hover:opacity-90">Ajukan Custom</button>
+                @elseif (! $pengguna)
+                    <a href="{{ Route::has('login') ? route('login') : url('/login') }}" class="rounded-xl bg-[#c9a26c] px-6 py-3 font-semibold text-slate-900 hover:opacity-90">Ajukan Custom</a>
+                @else
+                    <button type="button" disabled title="Hanya pembeli yang dapat mengajukan custom"
+                            class="cursor-not-allowed rounded-xl bg-[#c9a26c] px-6 py-3 font-semibold text-slate-900 opacity-50">Ajukan Custom</button>
+                @endif
             </div>
         </div>
     </div>
-
-    {{-- Form pengajuan custom --}}
-<div id="form-custom" class="mt-6 hidden rounded-2xl border border-[#e2d9bd] bg-white p-6 shadow-sm">
-    <h2 class="text-xl font-bold text-slate-900">Ajukan Custom Pesanan</h2>
-
-    <p class="mt-2 text-sm text-slate-600">
-        Produk: {{ $produk->nama }}
-    </p>
-
-    <p class="mt-1 text-sm text-slate-600">
-        Tuliskan detail ukuran, warna, motif, bahan, dan kebutuhan custom lainnya.
-        UMKM akan meninjau permintaan dan menentukan harga.
-    </p>
-
-    <form method="POST" action="{{ route('custom.store', $produk->id_produk) }}" class="mt-4 space-y-4">
-        @csrf
-
-        <textarea
-            name="spesifikasi"
-            rows="5"
-            required
-            minlength="10"
-            maxlength="3000"
-            placeholder="Contoh: Saya ingin lampu rotan ukuran 40 cm, warna natural, dengan motif minimalis..."
-            class="w-full rounded-xl border border-[#e2d9bd] px-4 py-3 text-sm focus:border-[#3d5a3d] focus:outline-none"
-        >{{ old('spesifikasi') }}</textarea>
-
-        @error('spesifikasi')
-            <p class="text-sm text-red-600">{{ $message }}</p>
-        @enderror
-
-        <div class="flex flex-wrap gap-3">
-            <button
-                type="submit"
-                class="rounded-xl bg-[#3d5a3d] px-6 py-3 font-semibold text-white hover:opacity-90">
-                Kirim Permintaan
-            </button>
-
-            <button
-                type="button"
-                onclick="document.getElementById('form-custom').classList.add('hidden')"
-                class="rounded-xl border border-slate-300 px-6 py-3 font-semibold text-slate-600">
-                Batal
-            </button>
-        </div>
-    </form>
-</div>
 
     {{-- Kartu toko --}}
     <div class="mt-12 flex flex-col gap-4 rounded-2xl border border-[#e2d9bd] bg-white p-6 shadow-sm sm:flex-row sm:items-center">
@@ -156,7 +126,33 @@
     </div>
 </div>
 
-{{-- Notifikasi (toast) --}}
+{{-- Pop-up Ajukan Custom (mengirim ke route custom.store milik modul Ordering) --}}
+@if ($bolehCustom)
+    <div id="modal-custom" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40 p-4">
+        <div class="w-full max-w-lg rounded-2xl bg-[#f8ecd0] p-6 shadow-xl">
+            <h2 class="text-xl font-bold text-slate-900">Ajukan Custom Pesanan</h2>
+            <p class="mt-1 text-sm text-slate-600">Kirim spesifikasi khusus kepada Admin UMKM. Harga custom akan ditawarkan UMKM setelah permintaanmu diterima.</p>
+
+            <div class="mt-4 rounded-xl bg-[#e2d9bd] p-4 text-sm">
+                <p class="font-semibold">{{ $produk->nama }}</p>
+                <p class="text-slate-600">Harga normal: Rp{{ number_format($produk->harga_retail, 0, ',', '.') }}</p>
+            </div>
+
+            <form method="POST" action="{{ route('custom.store', $produk->id_produk) }}" class="mt-4">
+                @csrf
+                <label class="mb-1 block text-sm font-medium">Spesifikasi custom</label>
+                <textarea name="spesifikasi" rows="4" required minlength="10" placeholder="Contoh: warna hitam, ukuran 30x20 cm, motif polos"
+                          class="w-full rounded-xl border border-[#c9a26c]/60 bg-white px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#3d5a3d]">{{ old('spesifikasi') }}</textarea>
+                @error('spesifikasi') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+
+                <div class="mt-5 flex justify-end gap-3">
+                    <button type="button" id="batal-custom" class="rounded-xl border border-[#e2d9bd] bg-white px-5 py-2 text-sm font-medium">Batal</button>
+                    <button type="submit" class="rounded-xl bg-[#3d5a3d] px-5 py-2 text-sm font-semibold text-white">Ajukan Custom</button>
+                </div>
+            </form>
+        </div>
+    </div>
+@endif
 
 <script>
     (function () {
@@ -176,12 +172,16 @@
             if (jumlah < stok) { jumlah++; render(); }
         });
 
-        var toast = document.getElementById('toast');
-        document.getElementById('btn-custom').addEventListener('click', function () {
-            toast.classList.remove('hidden');
-            clearTimeout(window.__toastTimer);
-            window.__toastTimer = setTimeout(function () { toast.classList.add('hidden'); }, 3500);
-        });
+        var modal = document.getElementById('modal-custom');
+        var tombol = document.getElementById('btn-custom');
+        if (modal && tombol) {
+            function buka() { modal.classList.remove('hidden'); modal.classList.add('flex'); }
+            function tutup() { modal.classList.add('hidden'); modal.classList.remove('flex'); }
+            tombol.addEventListener('click', buka);
+            document.getElementById('batal-custom').addEventListener('click', tutup);
+            modal.addEventListener('click', function (e) { if (e.target === modal) { tutup(); } });
+            if ({{ $errors->has('spesifikasi') ? 'true' : 'false' }}) { buka(); }
+        }
     })();
 </script>
 @endsection

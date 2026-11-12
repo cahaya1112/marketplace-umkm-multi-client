@@ -8,7 +8,7 @@
 <h1 class="mt-5 text-4xl font-bold text-cream md:text-5xl">Marketplace Produk UMKM</h1>
 <p class="mt-4 max-w-md text-sm font-light leading-relaxed text-white/80">Temukan produk kerajinan bambu, rotan, dan furnitur berkualitas dari UMKM lokal. Satu platform untuk banyak UMKM, dengan fitur custom pesanan khusus.</p>
 <div class="mt-7 flex flex-wrap gap-3 text-xs">
-<a href="#katalog" class="inline-flex items-center gap-2 rounded-lg bg-tan px-5 py-2.5 font-medium text-ink hover:brightness-95">Lihat Katalog <x-gi name="arrow" class="h-3.5 w-3.5" /></a>
+<a href="{{ route('katalog.index') }}" class="inline-flex items-center gap-2 rounded-lg bg-tan px-5 py-2.5 font-medium text-ink hover:brightness-95">Lihat Katalog <x-gi name="arrow" class="h-3.5 w-3.5" /></a>
 <a href="#umkm" class="rounded-lg border border-white/30 px-5 py-2.5 font-medium text-white hover:bg-white/10">Jelajahi UMKM</a>
 </div>
 </div>
@@ -34,11 +34,11 @@
 <h2 class="text-lg font-semibold">Kategori Populer</h2>
 <p class="text-xs text-gray-500">Jelajahi produk berdasarkan kategori</p>
 </div>
-<a href="#katalog" class="text-xs text-[#447A9C] hover:underline">Lihat Semua &rarr;</a>
+<a href="{{ route('katalog.index') }}" class="text-xs text-[#447A9C] hover:underline">Lihat Semua &rarr;</a>
 </div>
 <div class="mt-5 grid gap-5 md:grid-cols-3">
 @forelse ($kategori as $k)
-<a href="#katalog" class="overflow-hidden rounded-xl bg-white shadow-md shadow-black/5 transition hover:-translate-y-0.5">
+<a href="{{ route('katalog.index') }}"class="overflow-hidden rounded-xl bg-white shadow-md shadow-black/5 transition hover:-translate-y-0.5">
 <div class="flex h-28 items-center justify-center bg-gradient-to-b from-[#EFE6D6] to-[#DDE0D8] text-gray-400"><x-gi name="tag" class="h-8 w-8" /></div>
 <div class="px-4 py-3">
 <div class="text-sm font-semibold">{{ $k->nama }}</div>
@@ -57,7 +57,7 @@
 <h2 class="text-lg font-semibold">Produk Unggulan</h2>
 <p class="text-xs text-gray-500">Pilihan terbaik dari UMKM lokal</p>
 </div>
-<a href="#katalog" class="text-xs text-[#447A9C] hover:underline">Lihat Semua &rarr;</a>
+<a href="{{ route('katalog.index') }}" class="text-xs text-[#447A9C] hover:underline">Lihat Semua &rarr;</a>
 </div>
 <div class="mt-5 grid grid-cols-2 gap-5 md:grid-cols-4">
 @forelse ($produk as $p)

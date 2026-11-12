@@ -2,93 +2,68 @@
 
 namespace App\Modules\Catalog\Controllers;
 
-use App\Http\Controllers\Controller;
-use App\Modules\Catalog\Produk;
 use App\Modules\Catalog\PermintaanCustom;
 use Illuminate\Http\Request;
 
-class CustomController extends Controller
+class CustomController extends KelolaController
 {
-    /**
-     * Mengirim permintaan custom dari pembeli.
-     */
-    public function store(Request $request, int $id_produk)
+    // Alur: PENDING (pembeli mengajukan) -> UMKM kirim penawaran harga -> MENUNGGU_PERSETUJUAN
+    // -> pembeli memutuskan -> DISETUJUI / DITOLAK. UMKM juga boleh menolak langsung dari PENDING.
+    public function index(Request $request)
     {
-        abort_unless(auth()->user()->isPembeli(), 403);
+        $umkm = $this->umkmSaya();
+        $filter = $request->query('status');
 
-        $data = $request->validate([
-            'spesifikasi' => ['required', 'string', 'min:10', 'max:3000'],
-        ]);
-
-        $produk = Produk::tampilDiKatalog()
-            ->whereKey($id_produk)
-            ->firstOrFail();
-
-        PermintaanCustom::create([
-            'id_pengguna' => auth()->id(),
-            'id_produk' => $produk->id_produk,
-            'id_keranjang_item' => null,
-            'spesifikasi' => $data['spesifikasi'],
-            'harga_custom' => null,
-            'status_custom' => 'PENDING',
-            'catatan_umkm' => null,
-        ]);
-
-        return back()->with(
-            'success',
-            'Permintaan custom berhasil dikirim. Silakan tunggu penawaran harga dari UMKM.'
-        );
-    }
-
-    /**
-     * Menampilkan daftar permintaan custom milik pembeli.
-     */
-    public function index()
-    {
-        abort_unless(auth()->user()->isPembeli(), 403);
-
-        $daftar = PermintaanCustom::with(['produk.umkm'])
-            ->where('id_pengguna', auth()->id())
+        $daftar = PermintaanCustom::query()
+            ->with(['produk', 'pembeli'])
+            ->whereHas('produk', fn ($q) => $q->where('id_umkm', $umkm->id_umkm))
+            ->when(
+                in_array($filter, ['PENDING', 'MENUNGGU_PERSETUJUAN', 'DISETUJUI', 'DITOLAK'], true),
+                fn ($q) => $q->where('status_custom', $filter)
+            )
+            ->orderByRaw("CASE status_custom WHEN 'PENDING' THEN 0 WHEN 'MENUNGGU_PERSETUJUAN' THEN 1 ELSE 2 END")
             ->orderByDesc('id_custom')
-            ->paginate(10);
+            ->paginate(10)
+            ->withQueryString();
 
-        return view('ordering::custom.index', compact('daftar'));
+        return view('catalog::kelola.custom.index', compact('umkm', 'daftar', 'filter'));
     }
 
-    /**
-     * Menyetujui atau menolak penawaran harga dari UMKM.
-     */
-    public function keputusan(Request $request, int $id, string $aksi)
+    // Route kelola.custom.proses. {aksi} 'setujui' = kirim penawaran harga, 'tolak' = menolak permintaan.
+    public function proses(Request $request, int $id, string $aksi)
     {
-        abort_unless(auth()->user()->isPembeli(), 403);
-        abort_unless(in_array($aksi, ['setujui', 'tolak'], true), 404);
+        $umkm = $this->umkmSaya();
 
-        $custom = PermintaanCustom::where('id_pengguna', auth()->id())
-            ->whereKey($id)
-            ->firstOrFail();
+        // Hanya permintaan untuk produk milik UMKM ini (NFR-MC-06).
+        $custom = PermintaanCustom::whereHas('produk', fn ($q) => $q->where('id_umkm', $umkm->id_umkm))
+            ->findOrFail($id);
 
-        if (
-            $custom->status_custom !== 'MENUNGGU_PERSETUJUAN' ||
-            $custom->harga_custom === null
-        ) {
-            return back()->with(
-                'galat',
-                'Permintaan ini belum memiliki penawaran harga yang bisa diproses.'
-            );
+        if ($custom->status_custom !== 'PENDING') {
+            return back()->with('galat', 'Hanya permintaan baru yang dapat ditanggapi.');
         }
 
-        $custom->status_custom = $aksi === 'setujui'
-            ? 'DISETUJUI'
-            : 'DITOLAK';
+        if ($aksi === 'setujui') {
+            $data = $request->validate([
+                'harga_custom' => ['required', 'integer', 'min:1', 'max:1000000000'],
+                'catatan_umkm' => ['nullable', 'string', 'max:500'],
+            ]);
 
+            $custom->harga_custom = $data['harga_custom'];
+            $custom->catatan_umkm = $data['catatan_umkm'] ?? '';
+            $custom->status_custom = 'MENUNGGU_PERSETUJUAN';
+            $custom->save();
+
+            return back()->with('sukses', 'Penawaran harga dikirim ke pembeli.');
+        }
+
+        $data = $request->validate([
+            'catatan_umkm' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        $custom->catatan_umkm = $data['catatan_umkm'] ?? '';
+        $custom->status_custom = 'DITOLAK';
         $custom->save();
 
-        $pesan = $aksi === 'setujui'
-            ? 'Penawaran harga berhasil disetujui.'
-            : 'Penawaran harga berhasil ditolak.';
-
-        return redirect()
-            ->route('custom.saya')
-            ->with('success', $pesan);
+        return back()->with('sukses', 'Permintaan custom ditolak.');
     }
 }

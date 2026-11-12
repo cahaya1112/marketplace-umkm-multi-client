@@ -23,11 +23,11 @@
 <section id="kategori" class="mt-8">
 <div class="flex items-end justify-between">
 <h2 class="text-lg font-semibold">Kategori Populer</h2>
-<a href="#katalog" class="text-xs text-[#447A9C] hover:underline">Lihat Semua &rarr;</a>
+<a href="{{ route('katalog.index') }}" class="text-xs text-[#447A9C] hover:underline">Lihat Semua &rarr;</a>
 </div>
 <div class="mt-4 grid gap-4 md:grid-cols-3">
 @forelse ($kategori as $k)
-<a href="#katalog" class="flex flex-col items-center gap-2 rounded-xl border border-[#E8DFC6] bg-white px-4 py-5 shadow-sm transition hover:-translate-y-0.5">
+<a href="{{ route('katalog.index') }}" class="flex flex-col items-center gap-2 rounded-xl border border-[#E8DFC6] bg-white px-4 py-5 shadow-sm transition hover:-translate-y-0.5">
 <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-[#F6EADB] text-tan"><x-gi name="tag" class="h-4 w-4" /></span>
 <span class="text-xs font-medium">{{ $k->nama }}</span>
 </a>

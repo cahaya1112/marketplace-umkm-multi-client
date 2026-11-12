@@ -1,4 +1,7 @@
-@extends('layouts.publik')
+@php
+    $induk = (auth()->check() && auth()->user()->isPembeli()) ? 'layouts.pelanggan' : 'layouts.publik';
+@endphp
+@extends($induk)
 
 @section('title', 'Katalog Produk')
 
