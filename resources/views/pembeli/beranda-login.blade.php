@@ -12,7 +12,12 @@
 </section>
 
 <section class="mt-5 grid grid-cols-2 gap-4 md:grid-cols-4">
-@foreach ([['Katalog', 'box', '#katalog', 'bg-[#E6ECE6] text-forest'], ['Keranjang', 'cart', '#', 'bg-[#F6EADB] text-tan'], ['UMKM', 'store', '#umkm', 'bg-[#DCE8F1] text-[#447A9C]'], ['Kategori', 'tag', '#kategori', 'bg-[#E4ECE4] text-forest']] as [$nama, $ikon, $href, $warna])
+@foreach ([
+    ['Katalog', 'box', route('katalog.index'), 'bg-[#E6ECE6] text-forest'],
+    ['Keranjang', 'cart', route('keranjang.index'), 'bg-[#F6EADB] text-tan'],
+    ['UMKM', 'store', url('/#umkm'), 'bg-[#DCE8F1] text-[#447A9C]'],
+    ['Kategori', 'tag', url('/#kategori'), 'bg-[#E4ECE4] text-forest']
+] as [$nama, $ikon, $href, $warna])
 <a href="{{ $href }}" class="flex flex-col items-center gap-2 rounded-xl border border-[#E8DFC6] bg-white px-4 py-5 shadow-sm transition hover:-translate-y-0.5">
 <span class="flex h-9 w-9 items-center justify-center rounded-lg {{ $warna }}"><x-gi :name="$ikon" class="h-4 w-4" /></span>
 <span class="text-xs font-medium">{{ $nama }}</span>
