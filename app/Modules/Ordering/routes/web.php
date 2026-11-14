@@ -3,6 +3,7 @@
 use App\Modules\Ordering\Controllers\KeranjangController;
 use Illuminate\Support\Facades\Route;
 use App\Modules\Ordering\Controllers\CustomPesananController;
+use App\Modules\Ordering\Controllers\CheckoutController;
 
 Route::middleware(['web', 'auth'])->group(function () {
     Route::get('/keranjang', [KeranjangController::class, 'index'])
@@ -34,5 +35,11 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::post('/custom-saya/{id}/keranjang', [CustomPesananController::class,'masukkanKeranjang'])
         ->whereNumber('id')
         ->name('custom.keranjang');
+
+    Route::get('/checkout', [CheckoutController::class, 'index'])
+    ->name('checkout.index');
+
+    Route::post('/checkout', [CheckoutController::class, 'store'])
+    ->name('checkout.store');
 
 });
