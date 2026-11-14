@@ -13,6 +13,9 @@ use Illuminate\Validation\ValidationException;
 
 class KeranjangController extends Controller
 {
+    /**
+     * Menampilkan keranjang milik pembeli.
+     */
     public function index()
     {
         $keranjang = Keranjang::firstOrCreate([
@@ -35,7 +38,9 @@ class KeranjangController extends Controller
         ));
     }
 
-    
+    /**
+     * Menambahkan produk reguler ke keranjang.
+     */
     public function store(Request $request, $id_produk)
     {
         $data = $request->validate([
@@ -61,13 +66,17 @@ class KeranjangController extends Controller
                 'id_pengguna' => auth()->id(),
             ]);
 
+            // Cari item reguler saja.
+            // Item yang sudah terhubung dengan custom tidak boleh digabung.
             $item = KeranjangItem::where(
                 'id_keranjang',
                 $keranjang->id_keranjang
             )->where(
                 'id_produk',
                 $produk->id_produk
-            )->lockForUpdate()->first();
+            )->whereDoesntHave('permintaanCustom')
+                ->lockForUpdate()
+                ->first();
 
             $jumlahBaru = ($item?->jumlah ?? 0) + $data['jumlah'];
 
@@ -78,7 +87,9 @@ class KeranjangController extends Controller
             }
 
             if ($item) {
-                $item->update(['jumlah' => $jumlahBaru]);
+                $item->update([
+                    'jumlah' => $jumlahBaru,
+                ]);
             } else {
                 KeranjangItem::create([
                     'id_keranjang' => $keranjang->id_keranjang,
@@ -94,6 +105,9 @@ class KeranjangController extends Controller
         );
     }
 
+    /**
+     * Memperbarui jumlah produk reguler.
+     */
     public function update(Request $request, $id)
     {
         $data = $request->validate([
@@ -106,10 +120,20 @@ class KeranjangController extends Controller
         )->firstOrFail();
 
         DB::transaction(function () use ($keranjang, $id, $data) {
+
             $item = KeranjangItem::where(
                 'id_keranjang',
                 $keranjang->id_keranjang
-            )->whereKey($id)->lockForUpdate()->firstOrFail();
+            )->whereKey($id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            // Jumlah item custom tidak boleh diubah dari form reguler.
+            if ($item->permintaanCustom()->exists()) {
+                throw ValidationException::withMessages([
+                    'jumlah' => 'Jumlah pesanan custom tidak dapat diubah melalui keranjang.',
+                ]);
+            }
 
             $stok = Stok::where('id_produk', $item->id_produk)
                 ->lockForUpdate()
@@ -121,12 +145,20 @@ class KeranjangController extends Controller
                 ]);
             }
 
-            $item->update(['jumlah' => $data['jumlah']]);
+            $item->update([
+                'jumlah' => $data['jumlah'],
+            ]);
         });
 
-        return back()->with('success', 'Jumlah produk berhasil diperbarui.');
+        return back()->with(
+            'success',
+            'Jumlah produk berhasil diperbarui.'
+        );
     }
 
+    /**
+     * Menghapus item dari keranjang.
+     */
     public function destroy($id)
     {
         $keranjang = Keranjang::where(
@@ -134,11 +166,21 @@ class KeranjangController extends Controller
             auth()->id()
         )->firstOrFail();
 
-        KeranjangItem::where(
-            'id_keranjang',
-            $keranjang->id_keranjang
-        )->whereKey($id)->firstOrFail()->delete();
+        DB::transaction(function () use ($keranjang, $id) {
 
-        return back()->with('success', 'Produk berhasil dihapus dari keranjang.');
+            $item = KeranjangItem::where(
+                'id_keranjang',
+                $keranjang->id_keranjang
+            )->whereKey($id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            $item->delete();
+        });
+
+        return back()->with(
+            'success',
+            'Produk berhasil dihapus dari keranjang.'
+        );
     }
 }
