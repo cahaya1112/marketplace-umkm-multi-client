@@ -76,11 +76,42 @@
 
                     [$label, $warna] = $status[$c->status_custom]
                         ?? ['Status tidak diketahui', 'bg-gray-100 text-gray-700'];
+
+                    $jenisPesanan = [
+                        'CUSTOM_LANGSUNG' => 'Custom Langsung',
+                        'CUSTOM_DARI_STOK' => 'Custom dari Stok',
+                    ];
+
+                    $labelJenis = $jenisPesanan[$c->jenis_pesanan]
+                        ?? 'Jenis tidak diketahui';
                 @endphp
 
                 <span class="h-fit rounded-full px-3 py-1 text-sm font-medium {{ $warna }}">
                     {{ $label }}
                 </span>
+
+            </div>
+
+            {{-- Informasi Jenis dan Jumlah Pesanan --}}
+            <div class="mb-4 grid gap-3 sm:grid-cols-2">
+
+                <div class="rounded-lg bg-gray-50 p-3">
+                    <p class="text-xs text-gray-500">
+                        Jenis Pesanan
+                    </p>
+                    <p class="mt-1 font-semibold text-gray-800">
+                        {{ $labelJenis }}
+                    </p>
+                </div>
+
+                <div class="rounded-lg bg-gray-50 p-3">
+                    <p class="text-xs text-gray-500">
+                        Jumlah Pesanan
+                    </p>
+                    <p class="mt-1 font-semibold text-gray-800">
+                        {{ $c->jumlah_diminta }} unit
+                    </p>
+                </div>
 
             </div>
 
@@ -105,6 +136,9 @@
 
                         <p class="text-lg font-bold text-green-700">
                             Rp{{ number_format($c->harga_custom, 0, ',', '.') }}
+                        </p>
+                        <p class="text-xs text-gray-500">
+                            Harga per unit
                         </p>
                     </div>
                 @endif
@@ -193,6 +227,7 @@
 
                         <p class="text-sm text-green-700">
                             Custom ini sudah dimasukkan ke keranjang.
+                            Jumlah: {{ $c->jumlah_diminta }} unit.
                         </p>
 
                         <a href="{{ route('keranjang.index') }}"
