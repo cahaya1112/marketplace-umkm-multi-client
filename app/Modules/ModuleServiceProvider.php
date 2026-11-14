@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Modules;
 
 use Illuminate\Support\ServiceProvider;
@@ -12,14 +13,24 @@ abstract class ModuleServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $path = $this->modulePath();
-        $this->loadViewsFrom($path.'/resources/views', $this->moduleAlias());
-        
-        Livewire::addNamespace(
-            namespace: $this->moduleAlias(),
-            viewPath: $path.'/resources/views/livewire',
-        );
+        $viewPath = $path . '/resources/views';
+        $livewirePath = $viewPath . '/livewire';
 
-        foreach (glob($path.'/routes/*.php') ?: [] as $routeFile) {
+        // Daftarkan view hanya jika direktori tersedia.
+        if (is_dir($viewPath)) {
+            $this->loadViewsFrom($viewPath, $this->moduleAlias());
+        }
+
+        // Daftarkan namespace Livewire hanya jika direktori tersedia.
+        if (is_dir($livewirePath)) {
+            Livewire::addNamespace(
+                namespace: $this->moduleAlias(),
+                viewPath: $livewirePath,
+            );
+        }
+
+        // Muat seluruh file route yang tersedia.
+        foreach (glob($path . '/routes/*.php') ?: [] as $routeFile) {
             $this->loadRoutesFrom($routeFile);
         }
     }
