@@ -16,8 +16,15 @@ class PermintaanCustom extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'id_pengguna', 'id_produk', 'id_keranjang_item',
-        'spesifikasi', 'harga_custom', 'status_custom', 'catatan_umkm',
+        'id_pengguna',
+        'id_produk',
+        'id_keranjang_item',
+        'jenis_pesanan',
+        'jumlah_diminta',
+        'spesifikasi',
+        'harga_custom',
+        'status_custom',
+        'catatan_umkm',
     ];
 
     public function produk(): BelongsTo
