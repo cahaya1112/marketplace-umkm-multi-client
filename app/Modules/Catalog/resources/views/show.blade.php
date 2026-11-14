@@ -126,33 +126,130 @@
     </div>
 </div>
 
-{{-- Pop-up Ajukan Custom (mengirim ke route custom.store milik modul Ordering) --}}
+
+{{-- Pop-up Ajukan Custom --}}
 @if ($bolehCustom)
     <div id="modal-custom" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40 p-4">
         <div class="w-full max-w-lg rounded-2xl bg-[#f8ecd0] p-6 shadow-xl">
             <h2 class="text-xl font-bold text-slate-900">Ajukan Custom Pesanan</h2>
-            <p class="mt-1 text-sm text-slate-600">Kirim spesifikasi khusus kepada Admin UMKM. Harga custom akan ditawarkan UMKM setelah permintaanmu diterima.</p>
+
+            <p class="mt-1 text-sm text-slate-600">
+                Pilih jenis pesanan dan kirim spesifikasi custom kepada UMKM.
+            </p>
 
             <div class="mt-4 rounded-xl bg-[#e2d9bd] p-4 text-sm">
                 <p class="font-semibold">{{ $produk->nama }}</p>
-                <p class="text-slate-600">Harga normal: Rp{{ number_format($produk->harga_retail, 0, ',', '.') }}</p>
+                <p class="text-slate-600">
+                    Harga normal: Rp{{ number_format($produk->harga_retail, 0, ',', '.') }}
+                </p>
+                <p class="text-slate-600">
+                    Stok tersedia: {{ $jumlahStok }}
+                </p>
             </div>
 
-            <form method="POST" action="{{ route('custom.store', $produk->id_produk) }}" class="mt-4">
+            <form method="POST"
+                  action="{{ route('custom.store', $produk->id_produk) }}"
+                  class="mt-4">
+
                 @csrf
-                <label class="mb-1 block text-sm font-medium">Spesifikasi custom</label>
-                <textarea name="spesifikasi" rows="4" required minlength="10" placeholder="Contoh: warna hitam, ukuran 30x20 cm, motif polos"
-                          class="w-full rounded-xl border border-[#c9a26c]/60 bg-white px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#3d5a3d]">{{ old('spesifikasi') }}</textarea>
-                @error('spesifikasi') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+
+                <label class="mb-2 block text-sm font-medium">
+                    Jenis pesanan
+                </label>
+
+                <div class="space-y-3">
+                    <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-[#c9a26c]/60 bg-white p-3">
+                        <input type="radio"
+                               name="jenis_pesanan"
+                               value="CUSTOM_LANGSUNG"
+                               checked
+                               class="mt-1">
+
+                        <span>
+                            <span class="block text-sm font-semibold">Custom langsung</span>
+                            <span class="text-xs text-slate-500">
+                                Membuat pesanan custom tanpa mengambil stok reguler.
+                            </span>
+                        </span>
+                    </label>
+
+                    <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-[#c9a26c]/60 bg-white p-3">
+                        <input type="radio"
+                               name="jenis_pesanan"
+                               value="CUSTOM_DARI_STOK"
+                               class="mt-1"
+                               {{ $jumlahStok < 1 ? 'disabled' : '' }}>
+
+                        <span>
+                            <span class="block text-sm font-semibold">Custom dari stok</span>
+                            <span class="text-xs text-slate-500">
+                                Mengambil produk reguler yang tersedia untuk dibuat custom.
+                            </span>
+                        </span>
+                    </label>
+                </div>
+
+                @error('jenis_pesanan')
+                    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                @enderror
+
+                <div id="bagian-jumlah-custom" class="mt-4 hidden">
+                    <label for="jumlah_diminta" class="mb-1 block text-sm font-medium">
+                        Jumlah produk
+                    </label>
+
+                    <input type="number"
+                           id="jumlah_diminta"
+                           name="jumlah_diminta"
+                           min="1"
+                           max="{{ $jumlahStok }}"
+                           value="{{ old('jumlah_diminta', 1) }}"
+                           class="w-full rounded-xl border border-[#c9a26c]/60 bg-white px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#3d5a3d]">
+
+                    <p class="mt-1 text-xs text-slate-500">
+                        Maksimal {{ $jumlahStok }} unit sesuai stok tersedia.
+                    </p>
+
+                    @error('jumlah_diminta')
+                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div class="mt-4">
+                    <label class="mb-1 block text-sm font-medium">
+                        Spesifikasi custom
+                    </label>
+
+                    <textarea name="spesifikasi"
+                              rows="4"
+                              required
+                              minlength="10"
+                              maxlength="3000"
+                              placeholder="Contoh: warna hitam, ukuran 30x20 cm, motif polos"
+                              class="w-full rounded-xl border border-[#c9a26c]/60 bg-white px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#3d5a3d]">{{ old('spesifikasi') }}</textarea>
+
+                    @error('spesifikasi')
+                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
 
                 <div class="mt-5 flex justify-end gap-3">
-                    <button type="button" id="batal-custom" class="rounded-xl border border-[#e2d9bd] bg-white px-5 py-2 text-sm font-medium">Batal</button>
-                    <button type="submit" class="rounded-xl bg-[#3d5a3d] px-5 py-2 text-sm font-semibold text-white">Ajukan Custom</button>
+                    <button type="button"
+                            id="batal-custom"
+                            class="rounded-xl border border-[#e2d9bd] bg-white px-5 py-2 text-sm font-medium">
+                        Batal
+                    </button>
+
+                    <button type="submit"
+                            class="rounded-xl bg-[#3d5a3d] px-5 py-2 text-sm font-semibold text-white">
+                        Ajukan Custom
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 @endif
+
 
 <script>
     (function () {
@@ -180,7 +277,71 @@
             tombol.addEventListener('click', buka);
             document.getElementById('batal-custom').addEventListener('click', tutup);
             modal.addEventListener('click', function (e) { if (e.target === modal) { tutup(); } });
-            if ({{ $errors->has('spesifikasi') ? 'true' : 'false' }}) { buka(); }
+            
+var modal = document.getElementById('modal-custom');
+var tombol = document.getElementById('btn-custom');
+
+if (modal && tombol) {
+    function buka() {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+
+    function tutup() {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+
+    tombol.addEventListener('click', buka);
+
+    document.getElementById('batal-custom').addEventListener('click', tutup);
+
+    modal.addEventListener('click', function (e) {
+        if (e.target === modal) {
+            tutup();
+        }
+    });
+
+    // Pengaturan jenis pesanan custom.
+    var pilihanJenis = document.querySelectorAll('input[name="jenis_pesanan"]');
+    var bagianJumlah = document.getElementById('bagian-jumlah-custom');
+    var inputJumlah = document.getElementById('jumlah_diminta');
+
+    function aturJenisCustom() {
+        var pilihan = document.querySelector('input[name="jenis_pesanan"]:checked');
+
+        if (pilihan && pilihan.value === 'CUSTOM_DARI_STOK') {
+            bagianJumlah.classList.remove('hidden');
+            inputJumlah.required = true;
+        } else {
+            bagianJumlah.classList.add('hidden');
+            inputJumlah.required = false;
+        }
+    }
+
+    pilihanJenis.forEach(function (radio) {
+        radio.addEventListener('change', aturJenisCustom);
+    });
+
+    aturJenisCustom();
+
+    // Buka kembali modal jika validasi form gagal.
+    if (
+        {{ $errors->has('spesifikasi') ||
+            $errors->has('jenis_pesanan') ||
+            $errors->has('jumlah_diminta') ? 'true' : 'false' }}
+    ) {
+        var jenisLama = @json(old('jenis_pesanan', 'CUSTOM_LANGSUNG'));
+
+        pilihanJenis.forEach(function (radio) {
+            radio.checked = radio.value === jenisLama;
+        });
+
+        aturJenisCustom();
+        buka();
+    }
+}
+
         }
     })();
 </script>
