@@ -110,6 +110,18 @@
 
                             <div class="flex flex-col gap-5 p-6 sm:flex-row sm:items-start">
 
+                        {{-- Checkbox pilihan checkout --}}
+                                <input
+                                    type="checkbox"
+                                    name="selected_items[]"
+                                    value="{{ $item->id_keranjang_item }}"
+                                    form="form-pilih-checkout"
+                                    data-price="{{ $subtotal }}"
+                                    data-qty="{{ $item->jumlah }}"
+                                    class="checkout-checkbox h-5 w-5 rounded border-gray-300 text-green-800 focus:ring-green-700 cursor-pointer"
+                                    aria-label="Pilih {{ $produk->nama }} untuk checkout"
+                                >
+
                                 {{-- Gambar --}}
                                 <div class="h-28 w-28 shrink-0 overflow-hidden rounded-xl bg-[#f8ecd0]">
 
@@ -176,6 +188,20 @@
                                                 {{ $custom->spesifikasi }}
                                             </p>
 
+                                            <div class="mt-3 text-sm text-purple-800">
+                                            <p>
+                                                <strong>Jenis:</strong>
+                                                {{ $custom->jenis_pesanan === 'CUSTOM_DARI_STOK'
+                                                    ? 'Custom dari Stok'
+                                                    : 'Custom Langsung' }}
+                                            </p>
+
+                                            <p>
+                                                <strong>Jumlah:</strong>
+                                                {{ $item->jumlah }} unit
+                                            </p>
+                                        </div>
+
                                             @if ($custom->catatan_umkm)
                                                 <div class="mt-3 border-t border-purple-200 pt-3">
                                                     <p class="text-xs font-semibold text-purple-800">
@@ -204,17 +230,21 @@
                                     {{-- Jumlah dan tindakan --}}
                                     <div class="mt-4 flex flex-wrap items-center gap-4">
 
-                                        @if ($isCustom)
 
-                                            <span class="rounded-lg bg-purple-50 px-3 py-2 text-sm text-purple-700">
-                                                Jumlah: {{ $item->jumlah }} unit
-                                            </span>
+                                    @if ($isCustom)
 
-                                            <span class="text-xs text-purple-600">
-                                                Jumlah custom ditetapkan 1 unit.
-                                            </span>
+                                        <span class="rounded-lg bg-purple-50 px-3 py-2 text-sm text-purple-700">
+                                            Jumlah: {{ $item->jumlah }} unit
+                                        </span>
 
-                                        @else
+                                        <span class="text-xs text-purple-600">
+                                            {{ $custom->jenis_pesanan === 'CUSTOM_DARI_STOK'
+                                                ? 'Custom menggunakan stok produk reguler.'
+                                                : 'Custom langsung tanpa mengambil stok reguler.' }}
+                                        </span>
+
+                                    @else
+
 
                                             <form
                                                 method="POST"
@@ -312,41 +342,102 @@
 
         </div>
 
-        {{-- Total keranjang --}}
-        <div class="mt-8 rounded-2xl border border-[#e2d9bd] bg-white p-6 shadow-sm">
+        
+{{-- Ringkasan pemilihan checkout --}}
+<div class="mt-8 rounded-2xl border border-[#e2d9bd] bg-white p-6 shadow-sm">
 
-            <div class="flex flex-wrap items-center justify-between gap-4">
-
-                <span class="text-lg font-semibold text-slate-700">
-                    Total Keranjang
-                </span>
-
-                <span class="text-2xl font-bold text-forest">
-                    Rp{{ number_format($totalKeranjang, 0, ',', '.') }}
-                </span>
-
-            </div>
-
-            <p class="mt-2 text-sm text-slate-500">
-                Ongkos kirim dihitung saat proses checkout.
+    <div class="flex flex-wrap items-center justify-between gap-4">
+        <div>
+            <h3 class="text-lg font-semibold text-slate-700">
+                Total Seluruh Keranjang
+            </h3>
+            <p class="mt-1 text-sm text-slate-500">
+                Seluruh produk yang tersimpan di keranjang.
             </p>
-
-            <div class="mt-6 flex justify-end">
-
-                <button
-                    type="button"
-                    disabled
-                    title="Fitur checkout akan dikerjakan pada tahap berikutnya"
-                    class="cursor-not-allowed rounded-xl bg-forest px-8 py-3 text-sm font-semibold text-white opacity-50"
-                >
-                    Lanjut Checkout
-                </button>
-
-            </div>
-
         </div>
 
-    @endif
+        <span class="text-xl font-bold text-slate-700">
+            Rp{{ number_format($totalKeranjang, 0, ',', '.') }}
+        </span>
+    </div>
+
+    <div class="my-5 border-t border-dashed border-slate-200"></div>
+
+    <div class="flex flex-wrap items-center justify-between gap-4">
+        <div>
+            <h3 class="text-lg font-semibold text-forest">
+                Total Item Terpilih
+            </h3>
+            <p class="mt-1 text-sm text-slate-500">
+                <span id="jumlah-item-terpilih">0</span> unit dipilih untuk checkout.
+            </p>
+        </div>
+
+        <span id="total-item-terpilih"
+              class="text-2xl font-bold text-forest">
+            Rp0
+        </span>
+    </div>
+
+    <div class="mt-6 flex justify-end">
+        <form
+            id="form-pilih-checkout"
+            action="{{ route('checkout.index') }}"
+            method="GET"
+        >
+            <button
+                id="btn-checkout"
+                type="submit"
+                disabled
+                class="inline-flex items-center gap-2 rounded-xl bg-forest px-6 py-3 text-sm font-semibold text-white transition hover:bg-forestdark disabled:cursor-not-allowed disabled:opacity-40"
+            >
+                Lanjut Checkout
+                <x-gi name="arrow-right" class="h-4 w-4" />
+            </button>
+        </form>
+    </div>
+
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const checkboxes = document.querySelectorAll('.checkout-checkbox');
+    const totalElement = document.getElementById('total-item-terpilih');
+    const jumlahElement = document.getElementById('jumlah-item-terpilih');
+    const tombolCheckout = document.getElementById('btn-checkout');
+
+    function formatRupiah(angka) {
+        return 'Rp' + new Intl.NumberFormat('id-ID').format(angka);
+    }
+
+    function hitungPilihan() {
+        let total = 0;
+        let jumlah = 0;
+        let dipilih = 0;
+
+        checkboxes.forEach(function (checkbox) {
+            if (checkbox.checked) {
+                total += Number(checkbox.dataset.price);
+                jumlah += Number(checkbox.dataset.qty);
+                dipilih++;
+            }
+        });
+
+        totalElement.textContent = formatRupiah(total);
+        jumlahElement.textContent = jumlah;
+
+        tombolCheckout.disabled = dipilih === 0;
+    }
+
+    checkboxes.forEach(function (checkbox) {
+        checkbox.addEventListener('change', hitungPilihan);
+    });
+
+    hitungPilihan();
+});
+</script>
+
+@endif
 
 </div>
 
