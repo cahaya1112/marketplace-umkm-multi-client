@@ -113,6 +113,92 @@
                     </div>
                 </section>
 
+                {{-- Pilihan ongkos kirim --}}
+                <section class="bg-white rounded-2xl border border-amber-100 shadow-sm p-6">
+
+                    <h2 class="font-bold text-lg text-slate-800 mb-2">
+                        Pengiriman
+                    </h2>
+
+                    <p class="text-sm text-slate-500 mb-5">
+                        Hitung ongkos kirim berdasarkan lokasi UMKM dan alamat tujuan.
+                    </p>
+
+                    <button
+                        type="button"
+                        id="btnHitungOngkir"
+                        class="bg-green-800 hover:bg-green-900 text-white font-semibold rounded-xl py-3 px-5 transition"
+                    >
+                        Hitung Ongkos Kirim
+                    </button>
+
+                    <div
+                        id="statusOngkir"
+                        class="text-sm text-slate-500 mt-3"
+                        aria-live="polite"
+                    ></div>
+
+                    <div id="hasilOngkir" class="mt-5 space-y-5"></div>
+                </section>
+
+                {{-- Metode pembayaran --}}
+                <section class="bg-white rounded-2xl border border-amber-100 shadow-sm p-6">
+
+                    <h2 class="font-bold text-lg text-slate-800 mb-2">
+                        Metode Pembayaran
+                    </h2>
+
+                    <p class="text-sm text-slate-500 mb-5">
+                        Pilih metode pembayaran untuk seluruh pesananmu.
+                    </p>
+
+                    <div class="space-y-3">
+
+                        <label class="flex items-start gap-3 p-4 rounded-xl border border-slate-200 cursor-pointer hover:border-green-700 transition">
+                            <input
+                                type="radio"
+                                name="metode_pembayaran"
+                                value="COD"
+                                class="mt-1 accent-green-800"
+                                {{ old('metode_pembayaran', 'COD') === 'COD' ? 'checked' : '' }}
+                                required
+                            >
+
+                            <div>
+                                <strong class="text-slate-800">
+                                    Cash on Delivery (COD)
+                                </strong>
+
+                                <p class="text-sm text-slate-500 mt-1">
+                                    Bayar secara langsung ketika pesanan diterima.
+                                </p>
+                            </div>
+                        </label>
+
+                        <label class="flex items-start gap-3 p-4 rounded-xl border border-slate-200 cursor-pointer hover:border-green-700 transition">
+                            <input
+                                type="radio"
+                                name="metode_pembayaran"
+                                value="MIDTRANS"
+                                class="mt-1 accent-green-800"
+                                {{ old('metode_pembayaran') === 'MIDTRANS' ? 'checked' : '' }}
+                                required
+                            >
+
+                            <div>
+                                <strong class="text-slate-800">
+                                    Midtrans
+                                </strong>
+
+                                <p class="text-sm text-slate-500 mt-1">
+                                    Lakukan pembayaran secara online melalui Midtrans.
+                                </p>
+                            </div>
+                        </label>
+
+                    </div>
+                </section>
+
                 {{-- Ringkasan produk --}}
                 <section class="bg-white rounded-2xl border border-amber-100 shadow-sm p-6">
 
@@ -136,7 +222,7 @@
                             <div class="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100">
                                 <span class="text-green-800">▣</span>
                                 <strong class="text-slate-800">
-                                    {{ $umkm->nama_umkm ?? 'UMKM' }}
+                                    {{ $umkm->nama_umkm ?? $umkm->nama ?? 'UMKM' }}
                                 </strong>
                             </div>
 
@@ -223,6 +309,7 @@
                     </h2>
 
                     <div class="space-y-3 text-sm">
+
                         <div class="flex justify-between text-slate-600">
                             <span>Total produk</span>
                             <span>{{ $keranjang->item->sum('jumlah') }} unit</span>
@@ -235,8 +322,9 @@
 
                         <div class="flex justify-between text-slate-600">
                             <span>Ongkos kirim</span>
-                            <span class="text-slate-400">Dihitung berikutnya</span>
+                            <span id="totalOngkir">Belum dihitung</span>
                         </div>
+
                     </div>
 
                     <div class="border-t border-dashed border-slate-200 my-5"></div>
@@ -246,12 +334,19 @@
                             Total Belanja
                         </strong>
 
-                        <strong class="text-xl text-green-800">
+                        <strong
+                            id="totalPembayaran"
+                            class="text-xl text-green-800"
+                            data-subtotal="{{ $totalBelanja }}"
+                        >
                             {{ $formatRupiah($totalBelanja) }}
                         </strong>
                     </div>
 
-                    <p class="text-xs text-slate-400 mt-3">
+                    <p
+                        id="keteranganTotal"
+                        class="text-xs text-slate-400 mt-3"
+                    >
                         Total belum termasuk biaya pengiriman.
                     </p>
 
@@ -271,5 +366,281 @@
         </div>
     </form>
 </div>
+
+{{-- JavaScript Perhitungan Ongkir RajaOngkir --}}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const tombol = document.getElementById('btnHitungOngkir');
+    const status = document.getElementById('statusOngkir');
+    const hasil = document.getElementById('hasilOngkir');
+
+    const totalOngkir = document.getElementById('totalOngkir');
+    const totalPembayaran = document.getElementById('totalPembayaran');
+    const keteranganTotal = document.getElementById('keteranganTotal');
+
+    const form = document.querySelector('form[action="{{ route('checkout.store') }}"]');
+
+    const formatRupiah = angka =>
+        'Rp' + Number(angka).toLocaleString('id-ID');
+
+    let ongkirTerpilih = {};
+
+    // Hitung ongkir dari RajaOngkir.
+    tombol.addEventListener('click', async function () {
+
+        const alamat = document.querySelector('input[name="id_alamat"]:checked');
+
+        if (!alamat) {
+            status.textContent = 'Silakan pilih alamat pengiriman terlebih dahulu.';
+            return;
+        }
+
+        const selectedItems = Array.from(
+            form.querySelectorAll('input[name="selected_items[]"]')
+        ).map(input => input.value);
+
+        tombol.disabled = true;
+        tombol.textContent = 'Menghitung...';
+
+        status.textContent = 'Sedang menghubungi RajaOngkir...';
+
+        hasil.innerHTML = '';
+        ongkirTerpilih = {};
+
+        totalOngkir.textContent = 'Belum dipilih';
+
+        totalPembayaran.textContent = formatRupiah(
+            totalPembayaran.dataset.subtotal
+        );
+
+        keteranganTotal.textContent =
+            'Pilih layanan pengiriman untuk menghitung total.';
+
+        form.querySelectorAll('.input-ongkir').forEach(input => input.remove());
+
+        try {
+
+            const response = await fetch("{{ route('checkout.ongkir') }}", {
+                method: 'POST',
+
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+
+                body: JSON.stringify({
+                    id_alamat: alamat.value,
+                    selected_items: selectedItems
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Gagal menghitung ongkir.');
+            }
+
+            if (!data.data || data.data.length === 0) {
+                throw new Error('Layanan pengiriman tidak ditemukan.');
+            }
+
+            data.data.forEach(umkm => {
+
+                const container = document.createElement('div');
+
+                container.className =
+                    'border border-slate-200 rounded-xl p-4';
+
+                const judul = document.createElement('h3');
+
+                judul.className =
+                    'font-semibold text-slate-800 mb-2';
+
+                judul.textContent = umkm.nama_umkm;
+
+                const infoBerat = document.createElement('p');
+
+                infoBerat.className =
+                    'text-xs text-slate-500 mb-3';
+
+                infoBerat.textContent =
+                    'Berat: ' + umkm.berat_gram + ' gram';
+
+                container.append(judul, infoBerat);
+
+                if (!umkm.layanan || umkm.layanan.length === 0) {
+
+                    const pesan = document.createElement('p');
+
+                    pesan.className = 'text-sm text-red-600';
+
+                    pesan.textContent =
+                        'Tidak ada layanan pengiriman untuk wilayah ini.';
+
+                    container.appendChild(pesan);
+
+                } else {
+
+                    umkm.layanan.forEach((layanan, index) => {
+
+                        const label = document.createElement('label');
+
+                        label.className =
+                            'flex items-start gap-3 p-3 mb-2 rounded-lg border border-slate-200 cursor-pointer hover:border-green-700';
+
+                        const radio = document.createElement('input');
+
+                        radio.type = 'radio';
+                        radio.name = 'ongkir_' + umkm.id_umkm;
+                        radio.value = index;
+                        radio.className = 'mt-1 accent-green-800';
+                        radio.required = true;
+
+                        const detail = document.createElement('div');
+
+                        detail.className = 'flex-1 text-sm';
+
+                        const nama = document.createElement('strong');
+
+                        nama.className = 'block text-slate-800';
+
+                        nama.textContent =
+                            layanan.nama_kurir + ' - ' + layanan.layanan;
+
+                        const deskripsi = document.createElement('p');
+
+                        deskripsi.className = 'text-slate-500 mt-1';
+
+                        deskripsi.textContent = layanan.deskripsi;
+
+                        const biaya = document.createElement('p');
+
+                        biaya.className =
+                            'font-semibold text-green-800 mt-2';
+
+                        biaya.textContent = formatRupiah(layanan.biaya);
+
+                        const estimasi = document.createElement('p');
+
+                        estimasi.className =
+                            'text-xs text-slate-400 mt-1';
+
+                        estimasi.textContent = layanan.estimasi
+                            ? 'Estimasi: ' + layanan.estimasi
+                            : 'Estimasi tidak tersedia';
+
+                        detail.append(nama, deskripsi, biaya, estimasi);
+
+                        label.append(radio, detail);
+
+                        container.appendChild(label);
+
+                        radio.addEventListener('change', function () {
+
+                            ongkirTerpilih[umkm.id_umkm] = layanan;
+
+                            perbaruiTotal();
+
+                        });
+
+                    });
+                }
+
+                hasil.appendChild(container);
+
+            });
+
+            status.textContent =
+                'Berhasil mendapatkan pilihan pengiriman. Silakan pilih layanan untuk setiap UMKM.';
+
+        } catch (error) {
+
+            status.textContent = error.message;
+
+        } finally {
+
+            tombol.disabled = false;
+            tombol.textContent = 'Hitung Ongkos Kirim';
+
+        }
+
+    });
+
+
+    // Perbarui total setelah layanan dipilih.
+    function perbaruiTotal() {
+
+        const jumlahUmkm =
+            hasil.querySelectorAll(':scope > div').length;
+
+        const jumlahPilihan =
+            Object.keys(ongkirTerpilih).length;
+
+        const total = Object.values(ongkirTerpilih).reduce(
+            (sum, layanan) => sum + Number(layanan.biaya),
+            0
+        );
+
+        totalOngkir.textContent = formatRupiah(total);
+
+        const subtotal =
+            Number(totalPembayaran.dataset.subtotal);
+
+        totalPembayaran.textContent =
+            formatRupiah(subtotal + total);
+
+        if (jumlahPilihan === jumlahUmkm) {
+
+            keteranganTotal.textContent =
+                'Ongkos kirim seluruh UMKM sudah dipilih.';
+
+        } else {
+
+            keteranganTotal.textContent =
+                'Pilih layanan pengiriman untuk seluruh UMKM (' +
+                jumlahPilihan + '/' + jumlahUmkm + ').';
+
+        }
+
+        // Siapkan data pilihan ongkir untuk tahap penyimpanan pesanan.
+        form.querySelectorAll('.input-ongkir').forEach(
+            input => input.remove()
+        );
+
+        Object.entries(ongkirTerpilih).forEach(
+            ([idUmkm, layanan]) => {
+
+                const fields = {
+                    kode_kurir: layanan.kode_kurir,
+                    nama_kurir: layanan.nama_kurir,
+                    layanan: layanan.layanan,
+                    biaya: layanan.biaya
+                };
+
+                Object.entries(fields).forEach(([field, value]) => {
+
+                    const input = document.createElement('input');
+
+                    input.type = 'hidden';
+                    input.className = 'input-ongkir';
+
+                    input.name =
+                        `pengiriman[${idUmkm}][${field}]`;
+
+                    input.value = value;
+
+                    form.appendChild(input);
+
+                });
+
+            }
+        );
+
+    }
+
+});
+</script>
 
 @endsection

@@ -4,19 +4,13 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use App\Modules\Umkm\Umkm;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // Super Admin platform
+        // 1. Akun Super Admin
         User::updateOrCreate(
             ['email' => 'admin@marketplace.com'],
             [
@@ -26,7 +20,7 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        // Admin UMKM pertama + UMKM-nya
+        // 2. Akun Penjual pertama
         $penjual1 = User::updateOrCreate(
             ['email' => 'penjual@marketplace.com'],
             [
@@ -36,6 +30,7 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
+        // Data UMKM pertama
         Umkm::updateOrCreate(
             ['id_pengguna' => $penjual1->id_pengguna],
             [
@@ -47,7 +42,7 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        // Admin UMKM kedua + UMKM-nya (untuk menguji isolasi antar-UMKM)
+        // 3. Akun Penjual kedua
         $penjual2 = User::updateOrCreate(
             ['email' => 'penjual2@marketplace.com'],
             [
@@ -57,6 +52,7 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
+        // Data UMKM kedua
         Umkm::updateOrCreate(
             ['id_pengguna' => $penjual2->id_pengguna],
             [
@@ -68,7 +64,7 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        // Pembeli
+        // 4. Akun Customer
         User::updateOrCreate(
             ['email' => 'customer@marketplace.com'],
             [
@@ -77,8 +73,10 @@ class DatabaseSeeder extends Seeder
                 'peran' => 'PEMBELI',
             ]
         );
-        
-        $this->call(KatalogSeeder::class);
-        $this->call(TransaksiSeeder::class);
+
+        // 5. Seeder katalog
+        $this->call([
+            KatalogSeeder::class,
+        ]);
     }
 }

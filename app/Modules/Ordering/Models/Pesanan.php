@@ -6,6 +6,8 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Modules\Payments\Models\Pembayaran;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Pesanan extends Model
 {
@@ -57,4 +59,12 @@ class Pesanan extends Model
             'id_pesanan'
         );
     }
+    public function pembayaran(): HasOne
+{
+    return $this->hasOne(
+        Pembayaran::class,
+        'id_pesanan',
+        'id_pesanan'
+    );
+}
 }

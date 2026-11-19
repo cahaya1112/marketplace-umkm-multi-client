@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Http;
 
 class CheckoutController extends Controller
 {
@@ -111,6 +112,178 @@ class CheckoutController extends Controller
             'totalBelanja',
             'selectedItemIds'
         ));
+    }
+
+    /**
+     * Menghitung ongkos kirim setiap UMKM menggunakan RajaOngkir Komerce.
+     */
+    public function hitungOngkir(Request $request)
+    {
+        $validated = $request->validate([
+            'id_alamat' => 'required|integer',
+            'selected_items' => 'required|array|min:1',
+            'selected_items.*' => 'required|integer|distinct|min:1',
+        ]);
+
+        $idPengguna = auth()->id();
+
+        // Pastikan alamat merupakan milik pembeli yang sedang login.
+        $alamat = AlamatPembeli::where('id_alamat', $validated['id_alamat'])
+            ->where('id_pengguna', $idPengguna)
+            ->first();
+
+        if (! $alamat || ! $alamat->id_wilayah_tujuan) {
+            return response()->json([
+                'message' => 'Alamat atau wilayah tujuan tidak valid.',
+            ], 422);
+        }
+
+        $keranjang = Keranjang::where('id_pengguna', $idPengguna)
+            ->first();
+
+        if (! $keranjang) {
+            return response()->json([
+                'message' => 'Keranjang tidak ditemukan.',
+            ], 422);
+        }
+
+        // Ambil hanya item pilihan yang benar-benar berada di keranjang pembeli.
+        $items = KeranjangItem::with([
+            'produk.umkm',
+            'permintaanCustom',
+        ])
+            ->where('id_keranjang', $keranjang->id_keranjang)
+            ->whereIn('id_keranjang_item', $validated['selected_items'])
+            ->get();
+
+        if ($items->count() !== count($validated['selected_items'])) {
+            return response()->json([
+                'message' => 'Ada item keranjang yang tidak valid.',
+            ], 422);
+        }
+
+        // Validasi produk dan pesanan custom.
+        foreach ($items as $item) {
+            $custom = $item->permintaanCustom;
+
+            if (
+                ! $item->produk ||
+                ! $item->produk->umkm ||
+                (int) $item->jumlah < 1
+            ) {
+                return response()->json([
+                    'message' => 'Data produk atau jumlah tidak valid.',
+                ], 422);
+            }
+
+            if ($custom && (
+                $custom->status_custom !== 'DISETUJUI' ||
+                $custom->harga_custom === null
+            )) {
+                return response()->json([
+                    'message' => 'Pesanan custom belum disetujui atau harganya belum tersedia.',
+                ], 422);
+            }
+        }
+
+        // Pisahkan pengiriman berdasarkan UMKM.
+        $kelompokUmkm = $items->groupBy(
+            fn ($item) => $item->produk->id_umkm
+        );
+
+        $apiKey = config('services.rajaongkir.api_key');
+        $baseUrl = rtrim(
+            config('services.rajaongkir.base_url'),
+            '/'
+        );
+
+        if (! $apiKey || ! $baseUrl) {
+            return response()->json([
+                'message' => 'Konfigurasi API RajaOngkir belum tersedia.',
+            ], 500);
+        }
+
+        $hasil = [];
+
+        foreach ($kelompokUmkm as $idUmkm => $daftarItem) {
+            $umkm = $daftarItem->first()->produk->umkm;
+
+            // Total berat produk dalam satu kelompok UMKM.
+            $berat = $daftarItem->sum(function ($item) {
+                return (int) $item->produk->berat_gram
+                    * (int) $item->jumlah;
+            });
+
+            $origin = $umkm->id_wilayah_asal;
+            $destination = $alamat->id_wilayah_tujuan;
+
+            if (! $origin || $berat <= 0) {
+                return response()->json([
+                    'message' => 'Wilayah asal UMKM atau berat produk belum diatur.',
+                ], 422);
+            }
+
+            try {
+                $response = Http::asForm()
+                    ->withHeaders([
+                        'key' => $apiKey,
+                    ])
+                    ->timeout(20)
+                    ->post($baseUrl . '/calculate/domestic-cost', [
+                        'origin' => $origin,
+                        'destination' => $destination,
+                        'weight' => $berat,
+                        'courier' => 'jne:jnt:sicepat',
+                        'price' => 'lowest',
+                    ]);
+
+                if (! $response->successful()) {
+                    logger()->error('RajaOngkir gagal menghitung ongkir.', [
+                        'umkm_id' => $idUmkm,
+                        'response' => $response->body(),
+                    ]);
+
+                    return response()->json([
+                        'message' => 'Gagal menghitung ongkir untuk UMKM '
+                            . ($umkm->nama ?? 'ID ' . $idUmkm) . '.',
+                    ], 502);
+                }
+
+                // Ambil layanan yang benar-benar dikembalikan API.
+                $layanan = collect($response->json('data', []))
+                    ->map(function ($item) {
+                        return [
+                            'kode_kurir' => $item['code'] ?? '',
+                            'nama_kurir' => $item['name'] ?? '',
+                            'layanan' => $item['service'] ?? '',
+                            'deskripsi' => $item['description'] ?? '',
+                            'biaya' => (int) ($item['cost'] ?? 0),
+                            'estimasi' => $item['etd'] ?? '',
+                        ];
+                    })
+                    ->values();
+
+                $hasil[] = [
+                    'id_umkm' => (int) $idUmkm,
+                    'nama_umkm' => $umkm->nama ?? 'UMKM',
+                    'berat_gram' => $berat,
+                    'layanan' => $layanan,
+                ];
+            } catch (\Throwable $e) {
+                logger()->error('Koneksi RajaOngkir gagal.', [
+                    'message' => $e->getMessage(),
+                    'umkm_id' => $idUmkm,
+                ]);
+
+                return response()->json([
+                    'message' => 'Tidak dapat terhubung ke layanan RajaOngkir.',
+                ], 502);
+            }
+        }
+
+        return response()->json([
+            'data' => $hasil,
+        ]);
     }
 
     /**
