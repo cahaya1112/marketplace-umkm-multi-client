@@ -288,26 +288,37 @@ class CheckoutController extends Controller
 
     /**
      * Memproses hanya item yang dipilih pembeli.
+     * Pilihan ongkir disimpan pada masing-masing sub_pesanan.
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'id_alamat' => 'required|integer',
             'selected_items' => 'required|array|min:1',
             'selected_items.*' => 'required|integer|distinct|min:1',
+
+            'pengiriman' => 'required|array|min:1',
+            'pengiriman.*.kode_kurir' => 'required|string|max:50',
+            'pengiriman.*.nama_kurir' => 'required|string|max:100',
+            'pengiriman.*.layanan' => 'required|string|max:100',
+            'pengiriman.*.biaya' => 'required|integer|min:0',
+            'pengiriman.*.estimasi' => 'nullable|string|max:100',
         ]);
 
         $idPengguna = auth()->id();
 
         $selectedItemIds = array_map(
             'intval',
-            $request->input('selected_items')
+            $validated['selected_items']
         );
+
+        $pengiriman = $validated['pengiriman'];
 
         $hasil = DB::transaction(function () use (
             $request,
             $idPengguna,
-            $selectedItemIds
+            $selectedItemIds,
+            $pengiriman
         ) {
             // Validasi alamat milik pembeli.
             $alamat = AlamatPembeli::where('id_alamat', $request->id_alamat)
@@ -385,6 +396,25 @@ class CheckoutController extends Controller
                 fn ($item) => $item->produk->id_umkm
             );
 
+            // Pastikan setiap UMKM memiliki pilihan pengiriman.
+            $idUmkmPesanan = $kelompokUmkm->keys()
+                ->map(fn ($id) => (string) $id)
+                ->sort()
+                ->values()
+                ->all();
+
+            $idUmkmPengiriman = collect(array_keys($pengiriman))
+                ->map(fn ($id) => (string) $id)
+                ->sort()
+                ->values()
+                ->all();
+
+            if ($idUmkmPesanan !== $idUmkmPengiriman) {
+                throw ValidationException::withMessages([
+                    'pengiriman' => 'Pilih layanan pengiriman untuk setiap UMKM.',
+                ]);
+            }
+
             // Buat kode pesanan.
             do {
                 $kodePesanan = 'PSN-' . strtoupper(Str::random(10));
@@ -407,11 +437,18 @@ class CheckoutController extends Controller
             ]);
 
             foreach ($kelompokUmkm as $idUmkm => $daftarItem) {
+                $pilihanOngkir = $pengiriman[$idUmkm];
+
                 $subPesanan = SubPesanan::create([
                     'id_pesanan' => $pesanan->id_pesanan,
                     'id_umkm' => $idUmkm,
                     'status_sub_pesanan' => 'MENUNGGU_PEMBAYARAN',
-                    'biaya_pengiriman' => 0,
+
+                    'kurir_kode' => $pilihanOngkir['kode_kurir'],
+                    'kurir_layanan' => $pilihanOngkir['layanan'],
+                    'estimasi_pengiriman' => $pilihanOngkir['estimasi'] ?? null,
+                    'biaya_pengiriman' => (int) $pilihanOngkir['biaya'],
+
                     'dibuat_pada' => now(),
                 ]);
 

@@ -613,11 +613,12 @@ document.addEventListener('DOMContentLoaded', function () {
             ([idUmkm, layanan]) => {
 
                 const fields = {
-                    kode_kurir: layanan.kode_kurir,
-                    nama_kurir: layanan.nama_kurir,
-                    layanan: layanan.layanan,
-                    biaya: layanan.biaya
-                };
+    kode_kurir: layanan.kode_kurir,
+    nama_kurir: layanan.nama_kurir,
+    layanan: layanan.layanan,
+    biaya: layanan.biaya,
+    estimasi: layanan.estimasi || ''
+};
 
                 Object.entries(fields).forEach(([field, value]) => {
 
