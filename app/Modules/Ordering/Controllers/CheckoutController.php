@@ -523,11 +523,11 @@ class CheckoutController extends Controller
         });
 
         return redirect()
-            ->route('keranjang.index')
-            ->with(
-                'success',
-                'Pesanan berhasil dibuat dengan kode ' .
-                    $hasil->kode_pesanan
-            );
+        ->route('pesanan.detail', $hasil->id_pesanan)
+        ->with(
+            'success',
+            'Pesanan berhasil dibuat dengan kode ' .
+                $hasil->kode_pesanan
+        );
     }
 }
