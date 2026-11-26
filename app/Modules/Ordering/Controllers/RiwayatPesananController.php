@@ -15,7 +15,7 @@ class RiwayatPesananController extends Controller
         $pesanan = Pesanan::with([
             'subPesanan.umkm',
             'subPesanan.detail',
-            'subPesanan.pembayaran',
+            'pembayaran',
         ])
             ->where('id_pengguna', auth()->id())
             ->orderByDesc('tanggal_pesanan')
@@ -32,7 +32,7 @@ class RiwayatPesananController extends Controller
         $pesanan = Pesanan::with([
             'subPesanan.umkm',
             'subPesanan.detail',
-            'subPesanan.pembayaran',
+            'pembayaran',
         ])
             ->where('id_pengguna', auth()->id())
             ->where('id_pesanan', $id)
