@@ -5,6 +5,9 @@ use Illuminate\Support\Facades\Route;
 use App\Modules\Ordering\Controllers\CustomPesananController;
 use App\Modules\Ordering\Controllers\CheckoutController;
 use App\Modules\Ordering\Controllers\AlamatPembeliController;
+use App\Modules\Ordering\Controllers\RiwayatPesananController;
+use App\Modules\Ordering\Controllers\BeliSekarangController;
+
 
 Route::middleware(['web', 'auth'])->group(function () {
     Route::get('/keranjang', [KeranjangController::class, 'index'])
@@ -43,33 +46,42 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::post('/checkout', [CheckoutController::class, 'store'])
     ->name('checkout.store');
 
-    // Kelola alamat pembeli
-Route::get('/alamat', [AlamatPembeliController::class, 'index'])
-    ->name('alamat.index');
+        // Kelola alamat pembeli
+    Route::get('/alamat', [AlamatPembeliController::class, 'index'])
+        ->name('alamat.index');
 
-Route::get('/alamat/tambah', [AlamatPembeliController::class, 'create'])
-    ->name('alamat.create');
+    Route::get('/alamat/tambah', [AlamatPembeliController::class, 'create'])
+        ->name('alamat.create');
 
-Route::post('/alamat', [AlamatPembeliController::class, 'store'])
-    ->name('alamat.store');
+    Route::post('/alamat', [AlamatPembeliController::class, 'store'])
+        ->name('alamat.store');
 
-Route::get('/alamat/{id}/edit', [AlamatPembeliController::class, 'edit'])
-    ->whereNumber('id')
-    ->name('alamat.edit');
+    Route::get('/alamat/{id}/edit', [AlamatPembeliController::class, 'edit'])
+        ->whereNumber('id')
+        ->name('alamat.edit');
 
-Route::put('/alamat/{id}', [AlamatPembeliController::class, 'update'])
-    ->whereNumber('id')
-    ->name('alamat.update');
+    Route::put('/alamat/{id}', [AlamatPembeliController::class, 'update'])
+        ->whereNumber('id')
+        ->name('alamat.update');
 
-Route::delete('/alamat/{id}', [AlamatPembeliController::class, 'destroy'])
-    ->whereNumber('id')
-    ->name('alamat.destroy');
+    Route::delete('/alamat/{id}', [AlamatPembeliController::class, 'destroy'])
+        ->whereNumber('id')
+        ->name('alamat.destroy');
 
-Route::get('/api/alamat/wilayah', [
-    AlamatPembeliController::class,
-    'cariWilayah'
-])->name('alamat.wilayah');
-Route::post('/checkout/ongkir', [CheckoutController::class, 'hitungOngkir'])
-    ->name('checkout.ongkir');
+    Route::get('/api/alamat/wilayah', [AlamatPembeliController::class,'cariWilayah'])
+        ->name('alamat.wilayah');
 
+    Route::post('/checkout/ongkir', [CheckoutController::class, 'hitungOngkir'])
+        ->name('checkout.ongkir');
+
+            // Riwayat pesanan pembeli
+    Route::get('/pesanan-saya', [RiwayatPesananController::class, 'index'])
+        ->name('pesanan.saya');
+
+    Route::get('/pesanan-saya/{id}', [RiwayatPesananController::class, 'detail'])
+        ->whereNumber('id')
+        ->name('pesanan.detail');
+
+    Route::post('/produk/{id}/beli-sekarang', [BeliSekarangController::class, 'store'])
+        ->whereNumber('id')->name('checkout.langsung');
 });
