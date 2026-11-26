@@ -6,6 +6,7 @@ use App\Modules\Umkm\Umkm;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Modules\Payments\Models\Pembayaran;
 
 class SubPesanan extends Model
 {
@@ -53,6 +54,15 @@ class SubPesanan extends Model
     {
         return $this->hasMany(
             DetailPesanan::class,
+            'id_sub_pesanan',
+            'id_sub_pesanan'
+        );
+    }
+
+    public function pembayaran(): HasMany
+    {
+        return $this->hasMany(
+            Pembayaran::class,
             'id_sub_pesanan',
             'id_sub_pesanan'
         );
