@@ -74,6 +74,13 @@
             'href' => route('custom.saya'),
             'active' => request()->routeIs('custom.*'),
         ],
+
+        [
+    'label' => 'Pesanan Saya',
+    'icon' => 'box',
+    'href' => route('pesanan.saya'),
+    'active' => request()->routeIs('pesanan.*'),
+],
     ];
 @endphp
 
@@ -93,7 +100,7 @@
         </a>
 
         {{-- Navigasi utama --}}
-        <nav class="order-3 flex w-full items-center gap-1 overflow-x-auto pb-1 text-[13px] lg:order-none lg:w-auto lg:flex-1 lg:justify-center lg:pb-0">
+        <nav class="order-3 flex w-full flex-wrap items-center justify-center gap-1 pb-1 text-[13px] lg:order-none lg:w-auto lg:flex-1 lg:pb-0">
 
             @foreach ($nav as $menu)
                 <a href="{{ $menu['href'] }}"
