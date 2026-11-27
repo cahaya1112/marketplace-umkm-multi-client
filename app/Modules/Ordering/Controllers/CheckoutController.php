@@ -16,6 +16,9 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Http;
+use App\Modules\Payments\Contracts\PaymentGateway;
+use App\Modules\Payments\Data\CreatePaymentRequest;
+use App\Modules\Payments\Models\Pembayaran;
 
 class CheckoutController extends Controller
 {
@@ -53,7 +56,6 @@ class CheckoutController extends Controller
             ->whereIn('id_keranjang_item', $selectedItemIds)
             ->get();
 
-        // Pastikan seluruh item pilihan benar-benar milik keranjang.
         if ($items->count() !== count($selectedItemIds)) {
             return redirect()->route('keranjang.index')
                 ->with('galat', 'Ada item pilihan yang tidak valid.');
@@ -78,7 +80,6 @@ class CheckoutController extends Controller
             }
         }
 
-        // Gunakan hanya item terpilih pada halaman checkout.
         $keranjang->setRelation('item', $items);
 
         $kelompokUmkm = $items->groupBy(
@@ -127,7 +128,6 @@ class CheckoutController extends Controller
 
         $idPengguna = auth()->id();
 
-        // Pastikan alamat merupakan milik pembeli yang sedang login.
         $alamat = AlamatPembeli::where('id_alamat', $validated['id_alamat'])
             ->where('id_pengguna', $idPengguna)
             ->first();
@@ -147,7 +147,6 @@ class CheckoutController extends Controller
             ], 422);
         }
 
-        // Ambil hanya item pilihan yang benar-benar berada di keranjang pembeli.
         $items = KeranjangItem::with([
             'produk.umkm',
             'permintaanCustom',
@@ -162,7 +161,6 @@ class CheckoutController extends Controller
             ], 422);
         }
 
-        // Validasi produk dan pesanan custom.
         foreach ($items as $item) {
             $custom = $item->permintaanCustom;
 
@@ -186,12 +184,12 @@ class CheckoutController extends Controller
             }
         }
 
-        // Pisahkan pengiriman berdasarkan UMKM.
         $kelompokUmkm = $items->groupBy(
             fn ($item) => $item->produk->id_umkm
         );
 
         $apiKey = config('services.rajaongkir.api_key');
+
         $baseUrl = rtrim(
             config('services.rajaongkir.base_url'),
             '/'
@@ -208,7 +206,7 @@ class CheckoutController extends Controller
         foreach ($kelompokUmkm as $idUmkm => $daftarItem) {
             $umkm = $daftarItem->first()->produk->umkm;
 
-            // Total berat produk dalam satu kelompok UMKM.
+            // Hitung total berat produk dalam satu UMKM.
             $berat = $daftarItem->sum(function ($item) {
                 return (int) $item->produk->berat_gram
                     * (int) $item->jumlah;
@@ -249,7 +247,6 @@ class CheckoutController extends Controller
                     ], 502);
                 }
 
-                // Ambil layanan yang benar-benar dikembalikan API.
                 $layanan = collect($response->json('data', []))
                     ->map(function ($item) {
                         return [
@@ -269,6 +266,7 @@ class CheckoutController extends Controller
                     'berat_gram' => $berat,
                     'layanan' => $layanan,
                 ];
+
             } catch (\Throwable $e) {
                 logger()->error('Koneksi RajaOngkir gagal.', [
                     'message' => $e->getMessage(),
@@ -326,9 +324,9 @@ class CheckoutController extends Controller
                 ->lockForUpdate()
                 ->first();
 
-            if (! $alamat) {
+            if (! $alamat || ! $alamat->id_wilayah_tujuan) {
                 throw ValidationException::withMessages([
-                    'id_alamat' => 'Alamat pengiriman tidak valid.',
+                    'id_alamat' => 'Alamat atau wilayah tujuan tidak valid.',
                 ]);
             }
 
@@ -343,9 +341,9 @@ class CheckoutController extends Controller
                 ]);
             }
 
-            // Ambil hanya item yang dipilih dan kunci barisnya.
+            // Ambil item yang dipilih dan kunci barisnya.
             $items = KeranjangItem::with([
-                'produk',
+                'produk.umkm',
                 'permintaanCustom',
             ])
                 ->where('id_keranjang', $keranjang->id_keranjang)
@@ -359,12 +357,16 @@ class CheckoutController extends Controller
                 ]);
             }
 
-            // Validasi seluruh produk dan custom sebelum membuat pesanan.
+            // Validasi seluruh produk dan custom.
             foreach ($items as $item) {
                 $produk = $item->produk;
                 $custom = $item->permintaanCustom;
 
-                if (! $produk || $item->jumlah < 1) {
+                if (
+                    ! $produk ||
+                    ! $produk->umkm ||
+                    (int) $item->jumlah < 1
+                ) {
                     throw ValidationException::withMessages([
                         'produk' => 'Data produk atau jumlah tidak valid.',
                     ]);
@@ -391,7 +393,7 @@ class CheckoutController extends Controller
                 }
             }
 
-            // Kelompokkan item terpilih berdasarkan UMKM.
+            // Kelompokkan item berdasarkan UMKM.
             $kelompokUmkm = $items->groupBy(
                 fn ($item) => $item->produk->id_umkm
             );
@@ -415,6 +417,16 @@ class CheckoutController extends Controller
                 ]);
             }
 
+            /*
+             * VALIDASI ULANG ONGKIR
+             * Biaya dan layanan diperiksa langsung ke RajaOngkir.
+             */
+            $pengirimanValid = $this->validasiUlangOngkir(
+                $alamat,
+                $kelompokUmkm,
+                $pengiriman
+            );
+
             // Buat kode pesanan.
             do {
                 $kodePesanan = 'PSN-' . strtoupper(Str::random(10));
@@ -437,7 +449,8 @@ class CheckoutController extends Controller
             ]);
 
             foreach ($kelompokUmkm as $idUmkm => $daftarItem) {
-                $pilihanOngkir = $pengiriman[$idUmkm];
+                // Gunakan data ongkir resmi dari RajaOngkir.
+                $pilihanOngkir = $pengirimanValid[$idUmkm];
 
                 $subPesanan = SubPesanan::create([
                     'id_pesanan' => $pesanan->id_pesanan,
@@ -446,8 +459,8 @@ class CheckoutController extends Controller
 
                     'kurir_kode' => $pilihanOngkir['kode_kurir'],
                     'kurir_layanan' => $pilihanOngkir['layanan'],
-                    'estimasi_pengiriman' => $pilihanOngkir['estimasi'] ?? null,
-                    'biaya_pengiriman' => (int) $pilihanOngkir['biaya'],
+                    'estimasi_pengiriman' => $pilihanOngkir['estimasi'],
+                    'biaya_pengiriman' => $pilihanOngkir['biaya'],
 
                     'dibuat_pada' => now(),
                 ]);
@@ -523,11 +536,145 @@ class CheckoutController extends Controller
         });
 
         return redirect()
-        ->route('pesanan.detail', $hasil->id_pesanan)
-        ->with(
-            'success',
-            'Pesanan berhasil dibuat dengan kode ' .
-                $hasil->kode_pesanan
+            ->route('pesanan.detail', $hasil->id_pesanan)
+            ->with(
+                'success',
+                'Pesanan berhasil dibuat dengan kode ' .
+                    $hasil->kode_pesanan
+            );
+    }
+
+    /**
+     * Memvalidasi ulang pilihan ongkir langsung ke RajaOngkir.
+     *
+     * Data biaya dan estimasi yang dikembalikan berasal dari API,
+     * bukan dari input browser.
+     */
+    private function validasiUlangOngkir(
+        $alamat,
+        $kelompokUmkm,
+        array $pengiriman
+    ): array {
+        $apiKey = config('services.rajaongkir.api_key');
+
+        $baseUrl = rtrim(
+            config('services.rajaongkir.base_url'),
+            '/'
         );
+
+        if (! $apiKey || ! $baseUrl) {
+            throw ValidationException::withMessages([
+                'pengiriman' => 'Konfigurasi API RajaOngkir belum tersedia.',
+            ]);
+        }
+
+        $hasil = [];
+
+        foreach ($kelompokUmkm as $idUmkm => $daftarItem) {
+            $umkm = $daftarItem->first()->produk->umkm;
+
+            if (! $umkm || ! $umkm->id_wilayah_asal) {
+                throw ValidationException::withMessages([
+                    'pengiriman' => 'Wilayah asal UMKM belum tersedia.',
+                ]);
+            }
+
+            // Hitung ulang berat dari database.
+            $berat = $daftarItem->sum(function ($item) {
+                return (int) $item->produk->berat_gram
+                    * (int) $item->jumlah;
+            });
+
+            if ($berat <= 0) {
+                throw ValidationException::withMessages([
+                    'pengiriman' => 'Berat produk belum diatur.',
+                ]);
+            }
+
+            try {
+                $response = Http::asForm()
+                    ->withHeaders([
+                        'key' => $apiKey,
+                    ])
+                    ->timeout(20)
+                    ->post($baseUrl . '/calculate/domestic-cost', [
+                        'origin' => $umkm->id_wilayah_asal,
+                        'destination' => $alamat->id_wilayah_tujuan,
+                        'weight' => $berat,
+                        'courier' => 'jne:jnt:sicepat',
+                        'price' => 'lowest',
+                    ]);
+
+                if (! $response->successful()) {
+                    logger()->error('Validasi ulang ongkir gagal.', [
+                        'umkm_id' => $idUmkm,
+                        'response' => $response->body(),
+                    ]);
+
+                    throw ValidationException::withMessages([
+                        'pengiriman' => 'Gagal memvalidasi ongkir. Silakan hitung ulang.',
+                    ]);
+                }
+
+                $layananTersedia = collect(
+                    $response->json('data', [])
+                );
+
+                $pilihan = $pengiriman[$idUmkm] ?? null;
+
+                if (! $pilihan) {
+                    throw ValidationException::withMessages([
+                        'pengiriman' => 'Pilihan pengiriman UMKM tidak ditemukan.',
+                    ]);
+                }
+
+                // Cari kurir dan layanan yang sama persis.
+                $layananValid = $layananTersedia->first(
+                    function ($item) use ($pilihan) {
+                        return strtolower($item['code'] ?? '') ===
+                                strtolower($pilihan['kode_kurir']) &&
+                            ($item['service'] ?? '') === $pilihan['layanan'];
+                    }
+                );
+
+                if (! $layananValid) {
+                    throw ValidationException::withMessages([
+                        'pengiriman' => 'Layanan kurir sudah tidak tersedia. Silakan hitung ulang.',
+                    ]);
+                }
+
+                $biayaAsli = (int) ($layananValid['cost'] ?? 0);
+                $biayaDikirim = (int) $pilihan['biaya'];
+
+                if ($biayaAsli !== $biayaDikirim) {
+                    throw ValidationException::withMessages([
+                        'pengiriman' => 'Biaya ongkir berubah. Silakan hitung ulang ongkir.',
+                    ]);
+                }
+
+                // Simpan nilai resmi yang dikembalikan API.
+                $hasil[$idUmkm] = [
+                    'kode_kurir' => $layananValid['code'],
+                    'nama_kurir' => $layananValid['name'] ?? '',
+                    'layanan' => $layananValid['service'],
+                    'biaya' => $biayaAsli,
+                    'estimasi' => $layananValid['etd'] ?? '',
+                ];
+
+            } catch (ValidationException $e) {
+                throw $e;
+            } catch (\Throwable $e) {
+                logger()->error('Kesalahan validasi ulang ongkir.', [
+                    'umkm_id' => $idUmkm,
+                    'message' => $e->getMessage(),
+                ]);
+
+                throw ValidationException::withMessages([
+                    'pengiriman' => 'Tidak dapat memvalidasi ongkir. Silakan coba lagi.',
+                ]);
+            }
+        }
+
+        return $hasil;
     }
 }

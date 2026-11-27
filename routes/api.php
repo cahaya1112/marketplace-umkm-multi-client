@@ -2,6 +2,12 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Modules\Payments\Controllers\PaymentController;
+
+Route::post('/payments/midtrans/notification', [
+    PaymentController::class,
+    'notification'
+])->name('payments.midtrans.notification');
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -33,3 +39,5 @@ Route::put('/product/{id}', function (Request $request, $id) {
         ],
     ]);
 });
+
+

@@ -9,7 +9,7 @@
         ['label' => 'UMKM Saya', 'icon' => 'store', 'href' => route('kelola.toko.edit'), 'active' => request()->routeIs('kelola.toko.*')],
         ['label' => 'Produk', 'icon' => 'box', 'href' => route('kelola.produk.index'), 'active' => request()->routeIs('kelola.produk.*')],
         ['label' => 'Stok', 'icon' => 'layers', 'href' => route('kelola.stok.index'), 'active' => request()->routeIs('kelola.stok.*')],
-        ['label' => 'Pesanan', 'icon' => 'cart', 'href' => '#'],
+        ['label' => 'Pesanan','icon' => 'cart','href' => route('kelola.pesanan.index'),'active' => request()->routeIs('kelola.pesanan.*')],
         ['label' => 'Permintaan Custom', 'icon' => 'filepen', 'href' => route('kelola.custom.index'), 'active' => request()->routeIs('kelola.custom.*')],
         ['label' => 'Metode Pengiriman', 'icon' => 'truck', 'href' => '#'],
         ['label' => 'Retur', 'icon' => 'undo', 'href' => '#'],

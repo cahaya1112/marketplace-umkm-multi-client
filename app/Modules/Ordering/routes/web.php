@@ -1,15 +1,18 @@
+
 <?php
 
-use App\Modules\Ordering\Controllers\KeranjangController;
 use Illuminate\Support\Facades\Route;
+use App\Modules\Ordering\Controllers\KeranjangController;
 use App\Modules\Ordering\Controllers\CustomPesananController;
 use App\Modules\Ordering\Controllers\CheckoutController;
 use App\Modules\Ordering\Controllers\AlamatPembeliController;
 use App\Modules\Ordering\Controllers\RiwayatPesananController;
 use App\Modules\Ordering\Controllers\BeliSekarangController;
-
+use App\Modules\Ordering\Controllers\PesananUmkmController;
 
 Route::middleware(['web', 'auth'])->group(function () {
+
+    // Keranjang
     Route::get('/keranjang', [KeranjangController::class, 'index'])
         ->name('keranjang.index');
 
@@ -25,8 +28,11 @@ Route::middleware(['web', 'auth'])->group(function () {
         ->whereNumber('id')
         ->name('keranjang.destroy');
 
-    Route::post('/produk/{id_produk}/custom', [CustomPesananController::class, 'store']
-    )->whereNumber('id_produk')->name('custom.store');
+
+    // Pesanan Custom
+    Route::post('/produk/{id_produk}/custom', [CustomPesananController::class, 'store'])
+        ->whereNumber('id_produk')
+        ->name('custom.store');
 
     Route::get('/custom-saya', [CustomPesananController::class, 'index'])
         ->name('custom.saya');
@@ -36,17 +42,27 @@ Route::middleware(['web', 'auth'])->group(function () {
         ->whereIn('aksi', ['setujui', 'tolak'])
         ->name('custom.keputusan');
 
-    Route::post('/custom-saya/{id}/keranjang', [CustomPesananController::class,'masukkanKeranjang'])
+    Route::post('/custom-saya/{id}/keranjang', [CustomPesananController::class, 'masukkanKeranjang'])
         ->whereNumber('id')
         ->name('custom.keranjang');
 
+
+    // Checkout
     Route::get('/checkout', [CheckoutController::class, 'index'])
-    ->name('checkout.index');
+        ->name('checkout.index');
 
     Route::post('/checkout', [CheckoutController::class, 'store'])
-    ->name('checkout.store');
+        ->name('checkout.store');
 
-        // Kelola alamat pembeli
+    Route::post('/checkout/ongkir', [CheckoutController::class, 'hitungOngkir'])
+        ->name('checkout.ongkir');
+
+    Route::post('/produk/{id}/beli-sekarang', [BeliSekarangController::class, 'store'])
+        ->whereNumber('id')
+        ->name('checkout.langsung');
+
+
+    // Kelola Alamat Pembeli
     Route::get('/alamat', [AlamatPembeliController::class, 'index'])
         ->name('alamat.index');
 
@@ -68,13 +84,11 @@ Route::middleware(['web', 'auth'])->group(function () {
         ->whereNumber('id')
         ->name('alamat.destroy');
 
-    Route::get('/api/alamat/wilayah', [AlamatPembeliController::class,'cariWilayah'])
+    Route::get('/api/alamat/wilayah', [AlamatPembeliController::class, 'cariWilayah'])
         ->name('alamat.wilayah');
 
-    Route::post('/checkout/ongkir', [CheckoutController::class, 'hitungOngkir'])
-        ->name('checkout.ongkir');
 
-            // Riwayat pesanan pembeli
+    // Riwayat dan Pelacakan Pesanan Pembeli
     Route::get('/pesanan-saya', [RiwayatPesananController::class, 'index'])
         ->name('pesanan.saya');
 
@@ -82,6 +96,17 @@ Route::middleware(['web', 'auth'])->group(function () {
         ->whereNumber('id')
         ->name('pesanan.detail');
 
-    Route::post('/produk/{id}/beli-sekarang', [BeliSekarangController::class, 'store'])
-        ->whereNumber('id')->name('checkout.langsung');
+
+    // Pengelolaan Pesanan UMKM
+    Route::get('/umkm/pesanan', [PesananUmkmController::class, 'index'])
+        ->name('kelola.pesanan.index');
+
+    Route::get('/umkm/pesanan/{id}', [PesananUmkmController::class, 'show'])
+        ->whereNumber('id')
+        ->name('kelola.pesanan.show');
+
+    Route::patch('/umkm/pesanan/{id}/status', [PesananUmkmController::class, 'updateStatus'])
+        ->whereNumber('id')
+        ->name('kelola.pesanan.update-status');
+
 });
